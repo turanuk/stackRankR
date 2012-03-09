@@ -1,0 +1,41 @@
+!!! 5
+html
+  head
+    - if (typeof(title) == 'undefined')
+        title Mello
+    - else 
+        title= title
+  // include default stylesheets and any view stylesheets
+  link(rel='stylesheet', href=base + '/css/bootstrap.min.css')
+  style
+    body {
+      padding-top: 60px;
+    }
+  link(rel='stylesheet', href=base + '/css/bootstrap-responsive.min.css')
+  link(rel='stylesheet', href=base + '/css/reset.css')
+  link(rel='stylesheet', href=base + '/css/custom.css')
+  script(src=base + '/js/jquery-1.7.1.min.js')
+  script(src=base + '/js/jquery-ui-1.8.18.custom.min.js')
+  script(src=base + '/js/linq.min.js')
+  script(src=base + '/js/bootstrap.min.js')
+  script(src=base + '/js/knockout-2.0.0.js')
+  script(src=base + '/knockout/SRViewModel.js')
+  script(src=base + '/knockout/CustomBindings.js')
+
+  body
+    div(class="navbar navbar-fixed-top")
+      div(class="navbar-inner")
+        div(class="container")
+          a(class="btn btn-navbar", data-toggle="collapse", data-target=".nav-collapse")
+            span(class="icon-bar")
+            span(class="icon-bar")
+            span(class="icon-bar")
+          a(class="brand", href="#") stackRankR
+          div(class="nav-collapse")
+            ul(class="nav")
+              li(class="active")
+                a(href="#") Home
+              li
+                a(href=base + "/login") Login
+    div(class="container")
+      #body!=body

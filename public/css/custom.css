@@ -1,0 +1,70 @@
+.rankingContainer {
+  width: 1500px;
+}
+.addPerson {
+  float: right;
+  font-size: 26px;
+}
+.ranking {
+  height: 800px;
+  width: 250px;
+  float: left;
+  list-style: none;
+  font-family: Segoe UI;
+  font-weight: bold;
+  text-transform: uppercase;
+  border-radius: 5px;
+}
+.visibleRanking {
+  border-radius: 10px;
+  background-color: #e6e6e6;
+}
+.rankingbackground {
+  padding: 15px;
+  padding-bottom: 30px;
+}
+.deleteRanking {
+  float: right;
+}
+.rankingContainer > div:not(:first-child) {
+  margin-left: 20px;
+}
+.rankingEditName {
+  width: 100px;
+}
+
+ul.personContainer {
+  margin: 15px 0;
+  padding: 10px 0 10px;
+}
+.person {
+  display: block;
+  margin: 3px 7px 12px 13px;
+  border-top: 7px solid Black;
+  padding: 10px;
+  width: 175px;
+  color: Black;
+  background-color: #aaa8a8;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+}
+.personName {
+  font-size: 18px;
+  display: block;
+  -ms-user-select: none;
+  margin-bottom: 1px;
+}
+.personRemoveButton {
+  float: right;
+  display: block;
+  font-size: 16px;
+}
+.hoverPlaceholder {
+  border-top: 7px solid Black;
+  width: 200px;
+  height: 20px;
+  background-color: blue;
+  background-color: #aaa8a8;
+  margin: 10px;
+  opacity: 0.2;
+}

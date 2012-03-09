@@ -33,6 +33,12 @@ ko.bindingHandlers.selectText = {
     $(element).focus(function() {
       $(this).select();
     });
+    $(element).keydown(function (event) {
+        if (event.which === 13) {
+          event.preventDefault();
+          $(this).focusout();
+        }
+    });
   }
 }
 

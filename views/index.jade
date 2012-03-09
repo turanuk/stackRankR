@@ -14,5 +14,5 @@ div(class="rankingContainer", data-bind="foreach: rankings")
             li(class="person", data-bind="attr : { 'id': PersonId, 'data-RankingId' : RankingId }")
               span(class="personRemoveButton", data-bind="click: $root.removePersonFromRanking") x
               div(class="personName", data-bind="text: Name, click: $root.editPersonName, visible: !EditPersonName()")
-              input(type="text", class="personEditName", data-bind="value: Name, selectText: $parent, visible: EditPersonName, hasfocus: EditPersonName")
+              input(type="text", class="personEditName", data-bind="value: Name, valueUpdate: 'keyup', selectText: $parent, visible: EditPersonName, hasfocus: EditPersonName")
           span(class="deleteRanking", data-bind="click: $root.deleteRanking, disableSelection: $parent") Delete Ranking

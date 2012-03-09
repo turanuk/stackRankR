@@ -79,10 +79,10 @@ var SRViewModel = function (team) {
   //Front-end list manipulation functions
   self.newPersonToRanking = function (ranking) {
     //BUG : Need to get this new ID from data layer to avoid client-side duplicates
-    var personToAdd = new Person(-1, ranking.RankingId(), 'NewPerson');
+    var personToAdd = new Person(-1, ranking.RankingId, 'NewPerson');
     ranking.People.push(personToAdd);
   }
-  self.removePesronFromRanking = function (person) {
+  self.removePersonFromRanking = function (person) {
     var ranking = self.getRankingById(person.RankingId());
     ranking.People.remove(person);
   }

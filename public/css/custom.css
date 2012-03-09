@@ -30,7 +30,7 @@
   margin-left: 20px;
 }
 .rankingEditName {
-  width: 100px;
+  width: 60px;
 }
 
 ul.personContainer {
@@ -53,6 +53,10 @@ ul.personContainer {
   display: block;
   -ms-user-select: none;
   margin-bottom: 1px;
+}
+.personEditName {
+  color: Green;
+  width: 150px;
 }
 .personRemoveButton {
   float: right;

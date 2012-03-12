@@ -123,11 +123,16 @@ var saveData = function(data, response) {
     		response.writeHead(200, { "Content-Type": "text/plain" });
 			response.end();
 
-			db.close();
+	        callback(db);
+	    },
+
+	    function(db, callback) {
+	    	db.close();
 
 	    	// and we're done
-	        callback(null);
-	    }	    
+	        callback(null);	
+	    }
+
 	], function (err, result) {
 		// all done
 		if (err) {

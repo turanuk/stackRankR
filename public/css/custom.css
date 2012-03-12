@@ -50,12 +50,12 @@ ul.personContainer {
 }
 .personName {
   font-size: 18px;
+  width: 150px;
   display: block;
-  -ms-user-select: none;
+  overflow: hidden;
   margin-bottom: 1px;
 }
 .personEditName {
-  color: Green;
   width: 150px;
 }
 .personRemoveButton {

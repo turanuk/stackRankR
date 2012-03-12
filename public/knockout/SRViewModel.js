@@ -33,8 +33,7 @@ var Team = function (TeamId, Name, Rankings) {
 /////  VIEWMODEL
 var SRViewModel = function (team) {
   var self = this;
-  self.rankings = team.Rankings;
-  self.team = team;
+  self.team = ko.observable(team);
 
   //Functions called from custom binding that keep view and client side object model in sync
   self.reorderPerson = function (newIndex, personId, rankingId) {
@@ -54,7 +53,7 @@ var SRViewModel = function (team) {
 
   //Helper functions
   self.getRankingById = function (rankingId) {
-    return Enumerable.From(unwrap(self.rankings))
+    return Enumerable.From(unwrap(self.team().Rankings()))
       .Where(function (x) { return x.RankingId == rankingId }).First();
   }
   self.getPersonFromRanking = function (personId, ranking) {
@@ -70,10 +69,31 @@ var SRViewModel = function (team) {
     ranking.EditRankingName(true);
   }
   self.editTeamName = function () {
-    self.team.EditTeamName(true);
+    self.team().EditTeamName(true);
   }
   self.deleteRanking = function (ranking) {
     self.rankings.remove(ranking);
+  }
+
+  //Pulling the view model from the server
+  self.updateTeam = function () {
+    //Mock team object to use for testing out mapping
+    var team = {'TeamId':1, 'Name':'MyName', 
+      'Rankings': [
+        { 'RankingId': 1, 'Name': 'Worst', 'People': [ 
+          {'PersonId': 1, 'Name': 'Foo'}, 
+          {'PersonId': 2, 'Name': 'Bar'}
+        ]}, 
+        { 'RankingId': 2, 'Name': 'Below Average', 'People': [] }, 
+      ]
+    }
+
+    var outputTeam = self.createTeamFromObject(team);
+    self.team(outputTeam);
+  }
+
+  self.saveTeam = function () {
+    var outputTeam = self.createObjectFromTeam(self.team);
   }
 
   //Front-end list manipulation functions
@@ -86,9 +106,45 @@ var SRViewModel = function (team) {
     var ranking = self.getRankingById(person.RankingId());
     ranking.People.remove(person);
   }
+
+  /////  HELPER FUNCTIONS
+  self.createTeamFromObject = function (team) {
+    var rankings = new Array();
+    $.each(team.Rankings, function (i, state) {
+      var rankingObject = state;
+      var people = new Array();
+      $.each(state.People, function (i, state) {
+        var person = new Person(state.PersonId, rankingObject.RankingId, state.Name);
+        people.push(person);
+      });
+      var ranking = new Ranking(state.RankingId, team.TeamId, state.Name, people);
+      rankings.push(ranking);
+    });
+
+    return new Team(team.TeamId, team.Name, rankings);
+  }
+
+  //For pushing to the server
+  self.createObjectFromTeam = function (team) {
+    var outputTeam = { 'TeamId': 1, 'Name': team().Name() };
+    var rankings = unwrap(team().Rankings());
+    var rankingArray = new Array();
+    $.each(rankings, function (i, state) {
+      var people = unwrap(state.People);
+      var peopleArray = new Array();
+      $.each(people, function (i, state) {
+        var personObj = { 'PersonId': state.PersonId, 'Name': state.Name() }
+        peopleArray.push(personObj);
+      });
+      var ranking = { 'RankingId': state.RankingId, 'Name': state.Name(), 'People': peopleArray };
+      rankingArray.push(ranking);
+    });
+    outputTeam.Rankings = rankingArray;
+    return outputTeam;
+  }
 }
 
-/////  HELPER FUNCTIONS
+
 
 /////  CLIENT INIT
 $().ready(function () {

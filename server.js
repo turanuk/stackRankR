@@ -1,4 +1,5 @@
 var express = require('express');
+var dal = require("./dal/dataAccessLayer.js");
 
 var app = module.exports = express.createServer();
 
@@ -24,5 +25,6 @@ app.configure(function() {
 * include a route file for each major area of functionality in the site
 **/
 require('./routes/home')(app);
+require('./routes/dal')(app, dal);
 app.listen(process.env.PORT || 3000);
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);

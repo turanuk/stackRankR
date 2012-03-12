@@ -107,7 +107,7 @@ var getData = function(response) {
 	});
 };
 
-var saveData = function(board, response) {
+var saveData = function(data, response) {
 	async.waterfall([
 		// open db
 		function(callback) {
@@ -118,8 +118,7 @@ var saveData = function(board, response) {
 	    function(db, callback) {
     		console.log('Saving the data.');
 
-			// TODO: actually save the real data
-    		saveDataInternal(db, testData);
+    		saveDataInternal(db, data);
 
     		response.writeHead(200, { "Content-Type": "text/plain" });
 			response.end();

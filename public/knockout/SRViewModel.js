@@ -94,6 +94,10 @@ var SRViewModel = function (team) {
 
   self.saveTeam = function () {
     var outputTeam = self.createObjectFromTeam(self.team);
+    $.post('/saveData', outputTeam, 
+      function (data) {
+        
+      })
   }
 
   //Front-end list manipulation functions
@@ -143,8 +147,6 @@ var SRViewModel = function (team) {
     return outputTeam;
   }
 }
-
-
 
 /////  CLIENT INIT
 $().ready(function () {

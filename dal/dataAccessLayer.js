@@ -159,10 +159,10 @@ var saveDataInternal = function(db, data) {
 			if (item == null) {
 				console.log("Seeing the data for the first time, saving it.");
 
-				collection.insert(testData);
+				collection.insert(data);
 			} else {
 				collection.remove({ "TeamId": singleDataIdentifier });
-				collection.insert(testData);
+				collection.insert(data);
 			}
 
 			// create index; if exists, no-op

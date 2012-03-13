@@ -69,7 +69,7 @@ var SRViewModel = function (team) {
     self.team().EditTeamName(true);
   }
   self.deleteRanking = function (ranking) {
-    self.rankings.remove(ranking);
+    self.team().Rankings.remove(ranking);
   }
 
   //Pulling the view model from the server

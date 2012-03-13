@@ -123,7 +123,7 @@ var saveData = function(data, response) {
     		response.writeHead(200, { "Content-Type": "text/plain" });
 			response.end();
 
-	        callback(db);
+	        callback(null, db);
 	    },
 
 	    function(db, callback) {

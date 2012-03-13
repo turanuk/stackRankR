@@ -6,7 +6,7 @@ var async = require('async');
 
 var databaseName = "stackRankR";
 var dataTableName = "boards";	// single table where we're storing all of the data
-var singleDataIdentifier = 1;	// only storing one piece of data in the database; we'll identify it w/ this value
+var singleDataIdentifier = "1";	// only storing one piece of data in the database; we'll identify it w/ this value
 
 var testData =
 	{ 
@@ -62,14 +62,13 @@ var openDb = function(callback) {
 		} else {
 			console.log('Connection to db FAILED!');
 
-			callback(err);
+			callback(err, db);
 		}
 	});
 }
 
 var getData = function(response) {
 	async.waterfall([
-		// open db
 	    function(callback) {
 	    	openDb(callback);
 		},
@@ -82,34 +81,33 @@ var getData = function(response) {
 						console.log('Did NOT find the data.');
 					} else {
 						console.log('Found the data.');
+
+						response.writeHead(200, { "Content-Type": "application/json" });
+						// convert from a JSON object to a string
+						response.write(JSON.stringify(item));
 					}
 
-					response.writeHead(200, { "Content-Type": "application/json" });
-					// convert from a JSON object to a string
-					response.write(JSON.stringify(item));
-					response.end();
-
-					db.close();
+					// and we're done
+	        		callback(null, db);
 				});
 			});
-
-	    	// and we're done
-	        callback(null);
-	    }	    
-	], function (err, result) {
+	    }	   
+	], function (err, db) {
 		// all done
+		db.close();
+
 		if (err) {
 			console.log('Something went wrong with getting the data!')
 
 			response.writeHead(404, { "Content-Type": "text/plain" });
-			response.end();
 		}
+
+		response.end();
 	});
 };
 
 var saveData = function(data, response) {
 	async.waterfall([
-		// open db
 		function(callback) {
 	    	openDb(callback);
 		},
@@ -118,37 +116,30 @@ var saveData = function(data, response) {
 	    function(db, callback) {
     		console.log('Saving the data.');
 
-    		saveDataInternal(db, data);
-
-    		response.writeHead(200, { "Content-Type": "text/plain" });
-			response.end();
-
-	        callback(null, db);
-	    },
-
-	    function(db, callback) {
-	    	db.close();
-
-	    	// and we're done
-	        callback(null);	
+    		saveDataInternal(db, data, callback);
 	    }
-
-	], function (err, result) {
+	], function (err, db) {
 		// all done
+		db.close();
+
 		if (err) {
 			console.log('Something went wrong with saving the data!');
 			console.log(err);
-			//response.writeHead(500, { "Content-Type": "text/plain" });
-			//response.end();
+
+			response.writeHead(500, { "Content-Type": "text/plain" });
+		} else {
+			response.writeHead(200, { "Content-Type": "text/plain" });
 		}
+
+		response.end();
 	});
 };
 
-var saveDataInternal = function(db, data) {
+var saveDataInternal = function(db, data, callback) {
 	console.log('Saving data...');
 
 	// for now, we'll just out the board and re-add it; no partial updates
-	var board = db.collection(dataTableName, function(err, collection) {
+	db.collection(dataTableName, function(err, collection) {
 		collection.findOne({ "TeamId": singleDataIdentifier }, function(err, item) {
 			if (err) {
 				// note, an error here doesn't mean we didn't find the specified board; it means
@@ -170,6 +161,8 @@ var saveDataInternal = function(db, data) {
 			collection.ensureIndex({ "TeamId": singleDataIdentifier });
 
 			console.log('Data saved.');
+
+			callback(null, db);			
 		});
 	});
 }

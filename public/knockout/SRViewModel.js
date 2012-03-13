@@ -78,7 +78,7 @@ var SRViewModel = function (team) {
   //Pulling the view model from the server
   self.updateTeam = function () {
     //Mock team object to use for testing out mapping
-    var team = {'TeamId':1, 'Name':'MyName', 
+    /*var team = {'TeamId':1, 'Name':'MyName', 
       'Rankings': [
         { 'RankingId': 1, 'Name': 'Worst', 'People': [ 
           {'PersonId': 1, 'Name': 'Foo'}, 
@@ -86,18 +86,22 @@ var SRViewModel = function (team) {
         ]}, 
         { 'RankingId': 2, 'Name': 'Below Average', 'People': [] }, 
       ]
-    }
-
-    var outputTeam = self.createTeamFromObject(team);
-    self.team(outputTeam);
+    }*/
+    $.getJSON('/getData', 
+      function (data) {
+        var outputTeam = self.createTeamFromObject(data);
+        self.team(outputTeam);
+      }
+    );
   }
 
   self.saveTeam = function () {
     var outputTeam = self.createObjectFromTeam(self.team);
     $.post('/saveData', outputTeam, 
       function (data) {
-        
-      })
+
+      }
+    );
   }
 
   //Front-end list manipulation functions

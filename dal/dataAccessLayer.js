@@ -136,10 +136,10 @@ var saveData = function(data, response) {
 	], function (err, result) {
 		// all done
 		if (err) {
-			console.log('Something went wrong with saving the data!')
-
-			response.writeHead(500, { "Content-Type": "text/plain" });
-			response.end();
+			console.log('Something went wrong with saving the data!');
+			console.log(err);
+			//response.writeHead(500, { "Content-Type": "text/plain" });
+			//response.end();
 		}
 	});
 };

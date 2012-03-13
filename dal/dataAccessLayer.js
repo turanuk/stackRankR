@@ -1,3 +1,5 @@
+var exports = module.exports;
+
 var mongo = require('mongodb'),
   Server = mongo.Server,
   Db = mongo.Db;
@@ -56,9 +58,8 @@ var openDb = function(callback) {
 			// create the collection; if it already exists, no-op
 			// TODO: move this out of here so it's not invoked on every call!
 			db.createCollection(dataTableName, function(err, collection) {				
+				callback(null, db);
 			});
-
-			callback(null, db);
 		} else {
 			console.log('Connection to db FAILED!');
 
@@ -67,7 +68,7 @@ var openDb = function(callback) {
 	});
 }
 
-var getData = function(response) {
+exports.getData = function(response) {
 	async.waterfall([
 	    function(callback) {
 	    	openDb(callback);
@@ -106,7 +107,7 @@ var getData = function(response) {
 	});
 };
 
-var saveData = function(data, response) {
+exports.saveData = function(data, response) {
 	async.waterfall([
 		function(callback) {
 	    	openDb(callback);
@@ -166,6 +167,3 @@ var saveDataInternal = function(db, data, callback) {
 		});
 	});
 }
-
-exports.getData = getData;
-exports.saveData = saveData;

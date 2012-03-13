@@ -83,7 +83,7 @@ exports.getData = function(response) {
 					} else {
 						console.log('Found the data.');
 
-						response.writeHead(200, { "Content-Type": "application/json" });
+						response.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-cache" });
 						// convert from a JSON object to a string
 						response.write(JSON.stringify(item));
 					}

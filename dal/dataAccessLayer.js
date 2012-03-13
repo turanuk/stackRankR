@@ -7,7 +7,7 @@ var mongo = require('mongodb'),
 var async = require('async');
 
 var databaseName = "stackRankR";
-var dataTableName = "boards";	// single table where we're storing all of the data
+var dataTableName = "teams";	// single table where we're storing all of the data
 var singleDataIdentifier = "1";	// only storing one piece of data in the database; we'll identify it w/ this value
 
 var testData =

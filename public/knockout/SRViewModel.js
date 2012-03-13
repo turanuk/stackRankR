@@ -118,10 +118,12 @@ var SRViewModel = function (team) {
     $.each(team.Rankings, function (i, state) {
       var rankingObject = state;
       var people = new Array();
-      $.each(state.People, function (i, state) {
-        var person = new Person(state.PersonId, rankingObject.RankingId, state.Name);
-        people.push(person);
-      });
+      if (state.People) {
+        $.each(state.People, function (i, state) {
+          var person = new Person(state.PersonId, rankingObject.RankingId, state.Name);
+          people.push(person);
+        });
+      }
       var ranking = new Ranking(state.RankingId, team.TeamId, state.Name, people);
       rankings.push(ranking);
     });

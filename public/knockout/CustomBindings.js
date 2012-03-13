@@ -12,7 +12,7 @@ ko.bindingHandlers.rankingList = {
       stop: function (event, ui) {
         var ranking = $(ui.item).parent();
         var personId = ui.item.attr('id');
-        var rankingId = ui.item.attr('data-RankingId');
+        var rankingId = ranking.attr('data-RankingId');
         var internalRankingList = ranking.sortable('toArray');
         var newIndex = internalRankingList.indexOf(personId);
         //If coming from the same ranking, we need to re-order
@@ -20,8 +20,8 @@ ko.bindingHandlers.rankingList = {
           viewModel.reorderPerson(newIndex, personId, rankingId);
         } else {
           //Otherwise, we are coming from another ranking, we need to remove and add in the correct position in the array
-          var targetRankingId = ranking.attr('data-RankingId');
-          viewModel.movePerson(newIndex, personId, rankingId, targetRankingId);
+          var sourceRankingId = $(this).attr('data-RankingId');
+          viewModel.movePerson(newIndex, personId, sourceRankingId, rankingId);
         }
       }
     });

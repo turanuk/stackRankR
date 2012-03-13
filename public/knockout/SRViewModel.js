@@ -8,7 +8,6 @@ var unwrap = ko.utils.unwrapObservable;
 var Person = function (PersonId, RankingId, Name) {
   var self = this;
   self.PersonId = PersonId;
-  self.RankingId = ko.observable(RankingId);
   self.Name = ko.observable(Name);
   self.EditPersonName = ko.observable(false);
 }
@@ -16,7 +15,6 @@ var Person = function (PersonId, RankingId, Name) {
 var Ranking = function (RankingId, TeamId, Name, People) {
   var self = this;
   self.RankingId = RankingId;
-  self.TeamId = TeamId;
   self.Name = ko.observable(Name);
   self.People = ko.observableArray(People);
   self.EditRankingName = ko.observable(false);
@@ -47,7 +45,6 @@ var SRViewModel = function (team) {
     var targetRanking = self.getRankingById(targetRankingId);
     var person = self.getPersonFromRanking(personId, sourceRanking);
     sourceRanking.People.remove(person);
-    person.RankingId(targetRankingId);
     targetRanking.People.splice(newIndex, 0, person);
   }
 

@@ -99,9 +99,13 @@ var SRViewModel = function (team) {
     var personToAdd = new Person(-1, ranking.RankingId, 'NewPerson');
     ranking.People.push(personToAdd);
   }
-  self.removePersonFromRanking = function (person) {
-    var ranking = self.getRankingById(person.RankingId());
+  self.removePersonFromRanking = function (person, element) {
+    var rankingId = $($(element.currentTarget).parents('ul')).attr('data-RankingId');
+    var ranking = self.getRankingById(rankingId);
     ranking.People.remove(person);
+  }
+  self.addRanking = function (model) {
+    self.team().Rankings.push(new Ranking(-1, self.team().TeamId, 'NewRanking', []));
   }
 
   /////  HELPER FUNCTIONS

@@ -1,14 +1,17 @@
 h1 stackRankR
 p Sort it out.
 
-h2(data-bind="click: $root.updateTeam") Update
-h2(data-bind="click: $root.saveTeam") Save
-h2(data-bind="text: team().Name, click: $root.editTeamName, visible: !team().EditTeamName()")
-input(type="text", class="teamEditTitle", data-bind="value: team().Name, selectText: $root, visible: team().EditTeamName, hasfocus: team().EditTeamName")
-div(class="rankingContainer", data-bind="foreach: team().Rankings")
-  div(class="ranking")
-    div(class="visibleRanking")
-      div(class="rankingbackground")
+span(data-bind="click: $root.refreshTeam", class="refreshIcon")
+span(data-bind="click: $root.saveTeam", class="updateIcon")
+
+div(class="main")
+  span(data-bind="text: status", class="status")
+  h2(data-bind="text: team().Name, click: $root.editTeamName, visible: !team().EditTeamName()")
+  input(type="text", class="teamEditTitle", data-bind="value: team().Name, selectText: $root, visible: team().EditTeamName, hasfocus: team().EditTeamName")
+  div(class="rankingContainer", data-bind="foreach: team().Rankings")
+    div(class="ranking")
+      div(class="visibleRanking")
+        div(class="rankingbackground")
           span(data-bind="text: Name, click: $root.editRankingName, visible: !EditRankingName()")
           input(type="text", class="rankingEditName", data-bind="value: Name, selectText: $parent, visible: EditRankingName, hasfocus: EditRankingName")
           span(class="addPerson", data-bind="click: $root.newPersonToRanking, disableSelection: $parent") +

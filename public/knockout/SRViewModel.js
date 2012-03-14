@@ -32,6 +32,7 @@ var Team = function (TeamId, Name, Rankings) {
 var SRViewModel = function (team) {
   var self = this;
   self.team = ko.observable(team);
+  self.status = ko.observable();
 
   //Functions called from custom binding that keep view and client side object model in sync
   self.reorderPerson = function (newIndex, personId, rankingId) {
@@ -73,21 +74,12 @@ var SRViewModel = function (team) {
   }
 
   //Pulling the view model from the server
-  self.updateTeam = function () {
-    //Mock team object to use for testing out mapping
-    /*var team = {'TeamId':1, 'Name':'MyName', 
-      'Rankings': [
-        { 'RankingId': 1, 'Name': 'Worst', 'People': [ 
-          {'PersonId': 1, 'Name': 'Foo'}, 
-          {'PersonId': 2, 'Name': 'Bar'}
-        ]}, 
-        { 'RankingId': 2, 'Name': 'Below Average', 'People': [] }, 
-      ]
-    }*/
+  self.refreshTeam = function () {
     $.getJSON('/getData', 
       function (data) {
         var outputTeam = self.createTeamFromObject(data);
         self.team(outputTeam);
+        self.status('Refreshed');
       }
     );
   }
@@ -96,7 +88,7 @@ var SRViewModel = function (team) {
     var outputTeam = self.createObjectFromTeam(self.team);
     $.post('/saveData', outputTeam, 
       function (data) {
-
+        self.status('Saved');
       }
     );
   }

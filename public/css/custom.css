@@ -1,3 +1,7 @@
+.main {
+  clear: both;
+  margin-top: 50px;
+}
 .rankingContainer {
   width: 1500px;
 }
@@ -71,4 +75,20 @@ ul.personContainer {
   background-color: #aaa8a8;
   margin: 10px;
   opacity: 0.2;
+}
+.refreshIcon {
+  float: left;
+  margin-left: -10px;
+  clear: both;
+  display: block;
+  width: 36px;
+  height: 36px;
+  background: url(../img/refresh.png);
+}
+.updateIcon {
+  float: left;
+  display: block;
+  width: 36px;
+  height: 36px;
+  background: url(../img/save.png);
 }

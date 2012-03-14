@@ -7,7 +7,7 @@ var unwrap = ko.utils.unwrapObservable;
 /////  MODELS
 var Person = function (PersonId, Name) {
   var self = this;
-  self.PersonId = PersonId;
+  self.PersonId = ko.observable(PersonId);
   self.Name = ko.observable(Name);
   self.EditPersonName = ko.observable(false);
 }
@@ -40,6 +40,7 @@ var SRViewModel = function (team) {
     var person = self.getPersonFromRanking(personId, ranking);
     ranking.People.remove(person);
     ranking.People.splice(newIndex, 0, person);
+    self.updatePersonIds(ranking);
   }
   self.movePerson = function (newIndex, personId, sourceRankingId, targetRankingId) {
     var sourceRanking = self.getRankingById(sourceRankingId);
@@ -47,8 +48,14 @@ var SRViewModel = function (team) {
     var person = self.getPersonFromRanking(personId, sourceRanking);
     sourceRanking.People.remove(person);
     targetRanking.People.splice(newIndex, 0, person);
+    self.updatePersonIds(sourceRanking);
+    self.updatePersonIds(targetRanking);
   }
-
+  self.updatePersonIds = function (ranking) {
+    for (var i = 0; i < ranking.People().length; i++) {
+      ranking.People()[i].PersonId('r' + ranking.RankingId + 'p' + i);
+    }
+  }
   //Helper functions
   self.getRankingById = function (rankingId) {
     return Enumerable.From(unwrap(self.team().Rankings()))
@@ -56,7 +63,7 @@ var SRViewModel = function (team) {
   }
   self.getPersonFromRanking = function (personId, ranking) {
     return Enumerable.From(unwrap(ranking.People))
-      .Where(function (x) { return x.PersonId == personId }).First();
+      .Where(function (x) { return x.PersonId() == personId }).First();
   }
 
   //Front-end data-binding functions
@@ -95,17 +102,18 @@ var SRViewModel = function (team) {
 
   //Front-end list manipulation functions
   self.newPersonToRanking = function (ranking) {
-    //BUG : Need to get this new ID from data layer to avoid client-side duplicates
-    var personToAdd = new Person(-1, 'NewPerson');
+    var newId = 'r' + ranking.RankingId + 'p' + ranking.People().length;
+    var personToAdd = new Person(newId, 'NewPerson');
     ranking.People.push(personToAdd);
   }
   self.removePersonFromRanking = function (person, element) {
     var rankingId = $($(element.currentTarget).parents('ul')).attr('data-RankingId');
     var ranking = self.getRankingById(rankingId);
     ranking.People.remove(person);
+    self.updatePersonIds(ranking);
   }
   self.addRanking = function (model) {
-    self.team().Rankings.push(new Ranking(-1, 'NewRanking', []));
+    self.team().Rankings.push(new Ranking(self.team().Rankings().length, 'NewRanking', []));
   }
 
   /////  HELPER FUNCTIONS
@@ -151,33 +159,33 @@ var SRViewModel = function (team) {
 $().ready(function () {
   //TODO: Populate from server model on refresh
   var people = new Array(
-    new Person(1,'Jim'), 
-    new Person(2,'Mark')
+    new Person('r0p0','Jim'), 
+    new Person('r0p1','Mark')
   );
 
   var rankings = new Array(
     new Ranking(
-      1,
+      0,
       'Worst',
       people
     ),
     new Ranking(
-      2,
+      1,
       'Below Average',
       new Array()
     ),
     new Ranking(
-      3,
+      2,
       'Average',
       new Array()
     ),
     new Ranking(
-      4,
+      3,
       "Above Average",
       new Array()
     ),
     new Ranking(
-      5,
+      4,
       "Best",
       new Array()
     )

@@ -57,7 +57,11 @@ var openDb = function(callback) {
 
 			// create the collection; if it already exists, no-op
 			// TODO: move this out of here so it's not invoked on every call!
-			db.createCollection(dataTableName, function(err, collection) {				
+			db.createCollection(dataTableName, function(err, collection) {
+				if (err) {
+					callback(err, db);
+				}
+
 				callback(null, db);
 			});
 		} else {
@@ -78,6 +82,10 @@ exports.getData = function(response) {
 	    function(db, callback) {
 	    	db.collection(dataTableName, function(err, collection) {
 				collection.findOne({ "TeamId": singleDataIdentifier }, function(err, item) {
+					if (err) {
+						callback(err, db);
+					}
+
 					if (item == null) {
 						console.log('Did NOT find the data.');
 					} else {
@@ -95,10 +103,13 @@ exports.getData = function(response) {
 	    }	   
 	], function (err, db) {
 		// all done
-		db.close();
+		if (db !== undefined) {
+			db.close();
+		}
 
 		if (err) {
-			console.log('Something went wrong with getting the data!')
+			console.log('Something went wrong with getting the data!');
+			console.log(err);
 
 			response.writeHead(404, { "Content-Type": "text/plain" });
 		}

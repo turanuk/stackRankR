@@ -13,7 +13,7 @@ div(class="main")
       div(class="visibleRanking")
         div(class="rankingbackground")
           span(data-bind="text: Name, click: $root.editRankingName, visible: !EditRankingName()")
-          input(type="text", class="rankingEditName", data-bind="value: Name, selectText: $parent, visible: EditRankingName, hasfocus: EditRankingName")
+          input(type="text", class="rankingEditName", data-bind="value: Name, valueUpdate: 'keyup', selectText: $parent, visible: EditRankingName, hasfocus: EditRankingName")
           span(class="addPerson", data-bind="click: $root.newPersonToRanking, disableSelection: $parent") +
           ul(class="personContainer connectedSortable", data-bind="foreach: People, rankingList: $parent, attr: { 'data-RankingId' : RankingId }")
             li(class="person", data-bind="attr : { 'id': PersonId }")

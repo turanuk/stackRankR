@@ -5,14 +5,14 @@
 var unwrap = ko.utils.unwrapObservable;
 
 /////  MODELS
-var Person = function (PersonId, RankingId, Name) {
+var Person = function (PersonId, Name) {
   var self = this;
   self.PersonId = PersonId;
   self.Name = ko.observable(Name);
   self.EditPersonName = ko.observable(false);
 }
 
-var Ranking = function (RankingId, TeamId, Name, People) {
+var Ranking = function (RankingId, Name, People) {
   var self = this;
   self.RankingId = RankingId;
   self.Name = ko.observable(Name);
@@ -96,7 +96,7 @@ var SRViewModel = function (team) {
   //Front-end list manipulation functions
   self.newPersonToRanking = function (ranking) {
     //BUG : Need to get this new ID from data layer to avoid client-side duplicates
-    var personToAdd = new Person(-1, ranking.RankingId, 'NewPerson');
+    var personToAdd = new Person(-1, 'NewPerson');
     ranking.People.push(personToAdd);
   }
   self.removePersonFromRanking = function (person, element) {
@@ -105,7 +105,7 @@ var SRViewModel = function (team) {
     ranking.People.remove(person);
   }
   self.addRanking = function (model) {
-    self.team().Rankings.push(new Ranking(-1, self.team().TeamId, 'NewRanking', []));
+    self.team().Rankings.push(new Ranking(-1, 'NewRanking', []));
   }
 
   /////  HELPER FUNCTIONS
@@ -116,11 +116,11 @@ var SRViewModel = function (team) {
       var people = new Array();
       if (state.People) {
         $.each(state.People, function (i, state) {
-          var person = new Person(state.PersonId, rankingObject.RankingId, state.Name);
+          var person = new Person(state.PersonId, state.Name);
           people.push(person);
         });
       }
-      var ranking = new Ranking(state.RankingId, team.TeamId, state.Name, people);
+      var ranking = new Ranking(state.RankingId, state.Name, people);
       rankings.push(ranking);
     });
 
@@ -151,38 +151,33 @@ var SRViewModel = function (team) {
 $().ready(function () {
   //TODO: Populate from server model on refresh
   var people = new Array(
-    new Person(1, 1, 'Jim'), 
-    new Person(2, 1, 'Mark')
+    new Person(1,'Jim'), 
+    new Person(2,'Mark')
   );
 
   var rankings = new Array(
     new Ranking(
-      1,
       1,
       'Worst',
       people
     ),
     new Ranking(
       2,
-      1,
       'Below Average',
       new Array()
     ),
     new Ranking(
       3,
-      1,
       'Average',
       new Array()
     ),
     new Ranking(
       4,
-      1,
       "Above Average",
       new Array()
     ),
     new Ranking(
       5,
-      1,
       "Best",
       new Array()
     )

@@ -14,7 +14,7 @@ var Person = function (PersonId, Name) {
 
 var Ranking = function (RankingId, Name, People) {
   var self = this;
-  self.RankingId = RankingId;
+  self.RankingId = ko.observable(RankingId);
   self.Name = ko.observable(Name);
   self.People = ko.observableArray(People);
   self.EditRankingName = ko.observable(false);
@@ -33,6 +33,7 @@ var SRViewModel = function (team) {
   var self = this;
   self.team = ko.observable(team);
   self.status = ko.observable();
+  self.error = ko.observable();
 
   //Functions called from custom binding that keep view and client side object model in sync
   self.reorderPerson = function (newIndex, personId, rankingId) {
@@ -51,15 +52,11 @@ var SRViewModel = function (team) {
     self.updatePersonIds(sourceRanking);
     self.updatePersonIds(targetRanking);
   }
-  self.updatePersonIds = function (ranking) {
-    for (var i = 0; i < ranking.People().length; i++) {
-      ranking.People()[i].PersonId('r' + ranking.RankingId + 'p' + i);
-    }
-  }
+  
   //Helper functions
   self.getRankingById = function (rankingId) {
     return Enumerable.From(unwrap(self.team().Rankings()))
-      .Where(function (x) { return x.RankingId == rankingId }).First();
+      .Where(function (x) { return x.RankingId() == rankingId }).First();
   }
   self.getPersonFromRanking = function (personId, ranking) {
     return Enumerable.From(unwrap(ranking.People))
@@ -77,7 +74,12 @@ var SRViewModel = function (team) {
     self.team().EditTeamName(true);
   }
   self.deleteRanking = function (ranking) {
-    self.team().Rankings.remove(ranking);
+    if (ranking.People().length === 0) {
+      self.team().Rankings.remove(ranking);
+      self.updateRankingIds();
+    } else {
+      self.status('You cannot delete a ranking with people in it!');
+    }
   }
 
   //Pulling the view model from the server
@@ -102,7 +104,7 @@ var SRViewModel = function (team) {
 
   //Front-end list manipulation functions
   self.newPersonToRanking = function (ranking) {
-    var newId = 'r' + ranking.RankingId + 'p' + ranking.People().length;
+    var newId = 'r' + ranking.RankingId() + 'p' + ranking.People().length;
     var personToAdd = new Person(newId, 'NewPerson');
     ranking.People.push(personToAdd);
   }
@@ -114,9 +116,22 @@ var SRViewModel = function (team) {
   }
   self.addRanking = function (model) {
     self.team().Rankings.push(new Ranking(self.team().Rankings().length, 'NewRanking', []));
+    self.updateRankingIds();
   }
 
   /////  HELPER FUNCTIONS
+  self.updatePersonIds = function (ranking) {
+    for (var i = 0; i < ranking.People().length; i++) {
+      ranking.People()[i].PersonId('r' + ranking.RankingId() + 'p' + i);
+    }
+  }
+
+  self.updateRankingIds = function () {
+    for (var i = 0; i < self.team().Rankings().length; i++) {
+      self.team().Rankings()[i].RankingId(i);
+    }
+  }
+
   self.createTeamFromObject = function (team) {
     var rankings = new Array();
     $.each(team.Rankings, function (i, state) {
@@ -147,7 +162,7 @@ var SRViewModel = function (team) {
         var personObj = { 'PersonId': state.PersonId, 'Name': state.Name() }
         peopleArray.push(personObj);
       });
-      var ranking = { 'RankingId': state.RankingId, 'Name': state.Name(), 'People': peopleArray };
+      var ranking = { 'RankingId': state.RankingId(), 'Name': state.Name(), 'People': peopleArray };
       rankingArray.push(ranking);
     });
     outputTeam.Rankings = rankingArray;

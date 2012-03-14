@@ -132,7 +132,9 @@ exports.saveData = function(data, response) {
 	    }
 	], function (err, db) {
 		// all done
-		db.close();
+		if (db !== undefined) {
+			db.close();
+		}
 
 		if (err) {
 			console.log('Something went wrong with saving the data!');
@@ -154,9 +156,9 @@ var saveDataInternal = function(db, data, callback) {
 	db.collection(dataTableName, function(err, collection) {
 		collection.findOne({ "TeamId": singleDataIdentifier }, function(err, item) {
 			if (err) {
-				// note, an error here doesn't mean we didn't find the specified board; it means
-				// that we were unable to even run the "find" operation
 				console.log("Unable to retrieve data. Save failed.");
+
+				callback(err, db);
 			}
 
 			if (item == null) {

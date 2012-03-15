@@ -1,27 +1,7 @@
 h1 stackRankR
 p Sort it out.
 
-div(class="iconbar")
-  span(data-bind="click: $root.refreshTeam", class="icon refreshIcon")
-  span(data-bind="click: $root.saveTeam", class="icon updateIcon")
-  span(data-bind="click: $root.addRanking", class="icon addIcon")
-
-div(data-bind="text: status, fadeIn: status", class="status")
-
-div(class="main")
-  
-  h2(data-bind="text: team().Name, click: $root.editTeamName, visible: !team().EditTeamName()")
-  input(type="text", class="teamEditTitle", data-bind="value: team().Name, valueUpdate: 'keyup', selectText: $root, visible: team().EditTeamName, hasfocus: team().EditTeamName")
-  div(class="rankingContainer", data-bind="foreach: team().Rankings")
-    div(class="ranking")
-      div(class="visibleRanking")
-        div(class="rankingbackground")
-          span(data-bind="text: Name, click: $root.editRankingName, visible: !EditRankingName()")
-          input(type="text", class="rankingEditName", data-bind="value: Name, valueUpdate: 'keyup', selectText: $parent, visible: EditRankingName, hasfocus: EditRankingName")
-          span(class="addPerson", data-bind="click: $root.newPersonToRanking, disableSelection: $parent") +
-          ul(class="personContainer connectedSortable", data-bind="foreach: People, rankingList: $parent, attr: { 'data-RankingId' : RankingId }")
-            li(class="person", data-bind="attr : { 'id': PersonId }")
-              span(class="personRemoveButton", data-bind="click: $root.removePersonFromRanking") x
-              div(class="personName", data-bind="text: Name, click: $root.editPersonName, visible: !EditPersonName()")
-              input(type="text", class="personEditName", data-bind="value: Name, valueUpdate: 'keyup', selectText: $parent, visible: EditPersonName, hasfocus: EditPersonName")
-          span(class="deleteRanking", data-bind="click: $root.deleteRanking, disableSelection: $parent") Delete Ranking
+div Here is a list of your boards:
+  ul
+    li 
+      a(href="/team/2") Default Board

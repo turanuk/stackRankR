@@ -29,7 +29,7 @@ var Team = function (TeamId, Name, Rankings) {
 }
 
 /////  VIEWMODEL
-var SRViewModel = function (team) {
+var TeamViewModel = function (team) {
   var self = this;
   self.team = ko.observable(team);
   self.status = ko.observable();
@@ -208,5 +208,5 @@ $().ready(function () {
 
   var team = new Team(1, 'Default', rankings);
 
-  ko.applyBindings(new SRViewModel(team));
+  ko.applyBindings(new TeamViewModel(team));
 });

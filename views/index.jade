@@ -1,12 +1,15 @@
 h1 stackRankR
 p Sort it out.
 
-span(data-bind="click: $root.refreshTeam", class="icon refreshIcon")
-span(data-bind="click: $root.saveTeam", class="icon updateIcon")
-span(data-bind="click: $root.addRanking", class="icon addIcon")
+div(class="iconbar")
+  span(data-bind="click: $root.refreshTeam", class="icon refreshIcon")
+  span(data-bind="click: $root.saveTeam", class="icon updateIcon")
+  span(data-bind="click: $root.addRanking", class="icon addIcon")
+
+div(data-bind="text: status", class="status")
 
 div(class="main")
-  span(data-bind="text: status", class="status")
+  
   h2(data-bind="text: team().Name, click: $root.editTeamName, visible: !team().EditTeamName()")
   input(type="text", class="teamEditTitle", data-bind="value: team().Name, valueUpdate: 'keyup', selectText: $root, visible: team().EditTeamName, hasfocus: team().EditTeamName")
   div(class="rankingContainer", data-bind="foreach: team().Rankings")

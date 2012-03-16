@@ -1,13 +1,44 @@
+/*Top Icon Bar*/
+.iconbar {
+  height: 36px;
+}
+.icon {
+  float: left;
+  display: block;
+  width: 36px;
+  height: 36px;
+}
+.refreshIcon {
+  margin-left: -10px;
+  clear: both;
+  background: url(../img/refresh.png);
+}
+.updateIcon {
+  background: url(../img/save.png);
+}
+.addIcon {
+  background: url(../img/add.png);
+}
+.status {
+  clear: both;
+  height: 12px;
+  margin-top: 7px;
+  font-size: 12px;
+  text-transform: uppercase;
+  font-weight: bold;
+  color: #306816;
+}
+
+/*Main*/
 .main {
   clear: both;
-  margin-top: 50px;
+  margin-top: 15px;
 }
 .rankingContainer {
   width: 1500px;
 }
-.addPerson {
-  float: right;
-  font-size: 26px;
+.rankingContainer > div:not(:first-child) {
+  margin-left: 20px;
 }
 .ranking {
   height: 800px;
@@ -27,16 +58,13 @@
   padding: 15px;
   padding-bottom: 30px;
 }
-.deleteRanking {
-  float: right;
-}
-.rankingContainer > div:not(:first-child) {
-  margin-left: 20px;
-}
 .rankingEditName {
   width: 60px;
 }
-
+.addPerson {
+  float: right;
+  font-size: 26px;
+}
 ul.personContainer {
   margin: 15px 0;
   padding: 10px 0 10px;
@@ -52,6 +80,11 @@ ul.personContainer {
   -moz-user-select: none;
   -webkit-user-select: none;
 }
+.personRemoveButton {
+  float: right;
+  display: block;
+  font-size: 16px;
+}
 .personName {
   font-size: 18px;
   width: 150px;
@@ -62,11 +95,11 @@ ul.personContainer {
 .personEditName {
   width: 150px;
 }
-.personRemoveButton {
+.deleteRanking {
   float: right;
-  display: block;
-  font-size: 16px;
 }
+
+/*jQuery UI hover placeholder*/
 .hoverPlaceholder {
   border-top: 7px solid Black;
   width: 200px;
@@ -75,20 +108,4 @@ ul.personContainer {
   background-color: #aaa8a8;
   margin: 10px;
   opacity: 0.2;
-}
-.refreshIcon {
-  float: left;
-  margin-left: -10px;
-  clear: both;
-  display: block;
-  width: 36px;
-  height: 36px;
-  background: url(../img/refresh.png);
-}
-.updateIcon {
-  float: left;
-  display: block;
-  width: 36px;
-  height: 36px;
-  background: url(../img/save.png);
 }

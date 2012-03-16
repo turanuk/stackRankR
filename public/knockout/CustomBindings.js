@@ -47,3 +47,9 @@ ko.bindingHandlers.disableSelection = {
     $(element).disableSelection();
   }
 }
+
+ko.bindingHandlers.fadeIn = {
+  update: function (element, valueAccessor, allBindingsAccessor, model) {
+    $(element).hide().fadeIn();
+  }
+}

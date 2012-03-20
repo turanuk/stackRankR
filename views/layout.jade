@@ -34,8 +34,12 @@ html
           div(class="nav-collapse")
             ul(class="nav")
               li(class="active")
-                a(href="#") Home
-              li
-                a(href=base + "/login") Login
+                a(href=base) Home
+              - if (everyauth.loggedIn)
+                li
+                  a(href=base + "/logout") Logout
+              - else
+                li
+                  a(href=base + "/login") Login
     div(class="container")
       #body!=body

@@ -5,11 +5,11 @@ var path = require('path');
  * that always refers to the location of the base uri for the application
  **/
 module.exports = function(req, res, next) {
-    var app = req.app;
+  var app = req.app;
 
-    // set base var
-    res.local('base', '/' == app.route ? '' : app.route);
+  // set base var
+  res.local('base', '/' == app.route ? '' : app.route);
     
-    // allow the next piece of middleware to execute
-    next();
+  // allow the next piece of middleware to execute
+  next();
 };

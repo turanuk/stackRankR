@@ -6,8 +6,9 @@ var mongo = require('mongodb'),
 
 var async = require('async');
 
-var dataTableName = "teams";  // single table where we're storing all of the data
-var singleDataIdentifier = "1"; // only storing one piece of data in the database; we'll identify it w/ this value
+var dataTableName = 'teams';  // single table where we're storing all of the data
+var membershipTableName = 'membership';
+var singleDataIdentifier = '1'; // only storing one piece of data in the database; we'll identify it w/ this value
 
 var mongoLabUri = (process.env.MONGOLAB_URI || false);
 
@@ -135,6 +136,44 @@ var openDb = function(callback) {
   });
 }
 
+//Used to find user
+exports.findOrCreateUser = function (user) {
+  async.waterfall([
+    function (callback) {
+      openDb(callback);
+    },
+    function (db, callback) {
+      db.collection(membershipTableName, function (err, collection) {
+        collection.findOne({ 'id': user.id }, function (err, item) {
+          if (!err) {
+            if (!item) {
+              console.log('Did not find user, creating new');
+              collection.insert(user);
+              item = user;
+            } else { 
+              console.log('Found user');
+            }
+            collection.ensureIndex({ 'id': user.id });
+            callback(null, db, item);
+          } else {
+            callback(err, db);
+          }
+        });
+      });
+    }
+  ], function (err, db, item) {
+    if (db && db.close) {
+      db.close();
+    }
+    if (err) {
+      console.log('Something went wrong with finding the user!');
+      console.log(err);
+    } else {
+      return item;
+    }
+  });
+};
+
 exports.getData = function(response) {
   async.waterfall([
       function(callback) {
@@ -145,7 +184,7 @@ exports.getData = function(response) {
       function(db, callback) {
       console.log('Trying to get the data');
 
-        db.collection(dataTableName, function(err, collection) {
+      db.collection(dataTableName, function(err, collection) {
         collection.findOne({ "TeamId": singleDataIdentifier }, function(err, item) {
           if (!err) {
             if (item == null) {
@@ -167,7 +206,7 @@ exports.getData = function(response) {
       }    
   ], function (err, db) {
     // all done
-    if (db !== undefined) {
+    if (db && db.close) {
       db.close();
     }
 
@@ -196,7 +235,7 @@ exports.saveData = function(data, response) {
       }
   ], function (err, db) {
     // all done
-    if (db !== undefined) {
+    if (db && db.close) {
       db.close();
     }
 

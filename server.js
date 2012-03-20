@@ -90,15 +90,10 @@ everyauth.twitter
   .consumerSecret('')
   .callbackPath('/custom/twitter/callback/path')
   .findOrCreateUser( function (session, accessToken, accessTokenSecret, twitterUserMetadata) {
-    //TODO: Wire up layer that persists user information to a database
-    return twitterUserMetadata;
+      dal.findOrCreateUser(twitterUserMetadata);
+      return twitterUserMetadata;
   })
   .redirectPath('/')
-
-everyauth.azureacs
-  .identityProviderUrl('')
-  .entryPath('')
-
 
 /**
 * CONFIGURATION

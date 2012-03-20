@@ -109,3 +109,11 @@ ul.personContainer {
   margin: 10px;
   opacity: 0.2;
 }
+
+.avatar {
+  float: left;
+  width: 30px;
+  height: 30px;
+  margin-right: 7px;
+  margin-top: 5px;
+}

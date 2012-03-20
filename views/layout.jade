@@ -2,7 +2,7 @@
 html
   head
     - if (typeof(title) == 'undefined')
-        title Mello
+        title stackRankR
     - else 
         title= title
   // include default stylesheets and any view stylesheets
@@ -30,7 +30,11 @@ html
             span(class="icon-bar")
             span(class="icon-bar")
             span(class="icon-bar")
-          a(class="brand", href="#") stackRankR
+          - if (everyauth.twitter && everyauth.twitter.user)
+            img(class="avatar", src=everyauth.twitter.user.profile_image_url)
+            a(class="brand", href=base)=everyauth.twitter.user.screen_name
+          - else
+            a(class="brand", href=base) stackRankR
           div(class="nav-collapse")
             ul(class="nav")
               li(class="active")

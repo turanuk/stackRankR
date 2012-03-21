@@ -1,14 +1,14 @@
 module.exports = function (app, dal, authenticatedUser) {
 
-  app.get('/getData', authenticatedUser, function(req, res){
-    dal.getData(res);
+  app.get('/getTeam/:teamid', authenticatedUser, function(req, res){
+    dal.getTeam(req.session.auth.twitter.user.id, req.params.teamid, res);
   });
 
-  app.post('/saveData', authenticatedUser, function(req, res){
-    dal.saveData(req.body, res);
+  app.post('/saveTeam/:teamid', authenticatedUser, function(req, res){
+    dal.saveTeam(req.body, req.session.auth.twitter.user.id, req.params.teamid, res);
   });
 
   app.get('/getUserTeams', authenticatedUser, function(req, res){
-    dal.getUserTeams(req.body, res);
+    dal.getUserTeams(req.session.auth.twitter.user.id, res);
   });
 }

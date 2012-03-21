@@ -32,7 +32,7 @@ var IndexViewModel = function (teams) {
 
 /////  CLIENT INIT
 $().ready(function () {
-  $.getJSON('/getUserTeams/', function (data) {
+  $.getJSON('/getUserTeams', function (data) {
     ko.applyBindings(new IndexViewModel(data));
   }); 
 });

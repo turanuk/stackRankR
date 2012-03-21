@@ -84,18 +84,22 @@ var TeamViewModel = function (team) {
 
   //Pulling the view model from the server
   self.refreshTeam = function () {
-    $.getJSON('/getData', 
+    $.getJSON('/getTeam/' + self.team().TeamId, 
       function (data) {
-        var outputTeam = self.createTeamFromObject(data);
-        self.team(outputTeam);
-        self.status('Refreshed');
+        if (data) {
+          var outputTeam = self.createTeamFromObject(data);
+          self.team(outputTeam);
+          self.status('Refreshed');
+        } else {
+          self.status('Error');
+        }
       }
     );
   }
 
   self.saveTeam = function () {
     var outputTeam = self.createObjectFromTeam(self.team);
-    $.post('/saveData', outputTeam, 
+    $.post('/saveTeam/' + self.team().TeamId, outputTeam, 
       function (data) {
         self.status('Saved');
       }
@@ -132,6 +136,7 @@ var TeamViewModel = function (team) {
     }
   }
 
+  //For getting from the server
   self.createTeamFromObject = function (team) {
     var rankings = new Array();
     $.each(team.Rankings, function (i, state) {
@@ -152,14 +157,14 @@ var TeamViewModel = function (team) {
 
   //For pushing to the server
   self.createObjectFromTeam = function (team) {
-    var outputTeam = { 'TeamId': 1, 'Name': team().Name() };
+    var outputTeam = { 'TeamId': self.team().TeamId, 'Name': team().Name() };
     var rankings = unwrap(team().Rankings());
     var rankingArray = new Array();
     $.each(rankings, function (i, state) {
       var people = unwrap(state.People);
       var peopleArray = new Array();
       $.each(people, function (i, state) {
-        var personObj = { 'PersonId': state.PersonId, 'Name': state.Name() }
+        var personObj = { 'Name': state.Name() }
         peopleArray.push(personObj);
       });
       var ranking = { 'RankingId': state.RankingId(), 'Name': state.Name(), 'People': peopleArray };
@@ -172,41 +177,16 @@ var TeamViewModel = function (team) {
 
 /////  CLIENT INIT
 $().ready(function () {
-  //TODO: Populate from server model on refresh
-  var people = new Array(
-    new Person('r0p0','Jim'), 
-    new Person('r0p1','Mark')
+  //Using a utility class from within the view model
+  var viewModel = new TeamViewModel();
+  $.getJSON('/getTeam/' + window.location.pathname.split('/').pop(), 
+    function (data) {
+      if (data) {
+        var outputTeam = viewModel.createTeamFromObject(data);
+        ko.applyBindings(new TeamViewModel(outputTeam));
+      } else {
+        window.location.href = '/';
+      }
+    }
   );
-
-  var rankings = new Array(
-    new Ranking(
-      0,
-      'Worst',
-      people
-    ),
-    new Ranking(
-      1,
-      'Below Average',
-      new Array()
-    ),
-    new Ranking(
-      2,
-      'Average',
-      new Array()
-    ),
-    new Ranking(
-      3,
-      "Above Average",
-      new Array()
-    ),
-    new Ranking(
-      4,
-      "Best",
-      new Array()
-    )
-  );
-
-  var team = new Team(1, 'Default', rankings);
-
-  ko.applyBindings(new TeamViewModel(team));
 });

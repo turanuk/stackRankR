@@ -132,12 +132,21 @@ var authenticatedUser = function (req, res, next) {
   }
 }
 
+//authorization middleware (twitter specific)
+var authorizedUser = function (req, res, next) {
+  if (req.session.auth.loggedIn && req.session.auth.twitter && (req.session.auth.twitter.user.id == req.params.userid)) {
+    next();
+  } else {
+    res.render('autherror');
+  }
+}
+
 /**
 * ROUTING
 * -------------------------------------------------------------------------------------------------
 * include a route file for each major area of functionality in the site
 **/
-require('./routes/home')(app, authenticatedUser);
+require('./routes/home')(app, authenticatedUser, authorizedUser);
 require('./routes/dal')(app, dal, authenticatedUser);
 app.listen(process.env.PORT || 3000);
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);

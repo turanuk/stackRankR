@@ -63,6 +63,6 @@ ko.bindingHandlers.sortable = {
 ko.bindingHandlers.linkGenerator = {
   init: function (element, valueAccessor, allBindingsAccessor, model) {
     var userId = $(element).attr('href');
-    $(element).attr('href', '/team/' + userId + '/' + model.TeamId())
+    $(element).attr('href', '/team/' + userId + '/' + model.TeamId)
   }
 }

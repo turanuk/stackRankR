@@ -8,7 +8,7 @@ var async = require('async');
 
 var dataTableName = 'teams';  // single table where we're storing all of the data
 var membershipTableName = 'membership';
-var teamTableName = 'teams';
+var teamTableName = 'tempTeams';
 var singleDataIdentifier = '1'; // only storing one piece of data in the database; we'll identify it w/ this value
 
 var mongoLabUri = (process.env.MONGOLAB_URI || false);
@@ -51,35 +51,18 @@ if (mongoLabUri) {
 
 var testData =
   { 
-    'TeamId': singleDataIdentifier,
-    'teamName': 'DEX'
-    ,
-    'rankings': [
+    'TeamId': '0',
+    'Name': 'DEX',
+    'Rankings': [
       {
-        '_id': 'r1',
-        'rankingName': 'Best',
-        'people': [
+        'RankingId': '0',
+        'Name': 'Best',
+        'People': [
           {
-            '_id': 'p1',
-            'name': 'Bob'
+            'Name': 'Foo'
           },
           {
-            '_id': 'p2',
-            'name': 'Larry'
-          }
-        ]
-      },
-      {
-        '_id': 'r2',
-        'rankingName': 'Worst',
-        'people': [
-          {
-            '_id': 'p3',
-            'name': 'Bob Jr.'
-          },
-          {
-            '_id': 'p4',
-            'name': 'Larry Jr.'
+            'Name': 'Bar'
           }
         ]
       }
@@ -150,7 +133,15 @@ exports.findOrCreateUser = function (user, response) {
             if (!item) {
               console.log('Did not find user, creating new');
               collection.insert(user);
-              //TODO : Create the user's first team
+              //Create user's team as well
+              db.collection(teamTableName, function (err, teamCollection) {
+                if (!err) {
+                  testData.userid = user.id;
+                  teamCollection.insert(testData);
+                  teamCollection.ensureIndex({'userid': user.id});
+                }
+              });
+              //set the item to be the user
               item = user;
             } else { 
               console.log('Found user');
@@ -183,8 +174,8 @@ exports.getUserTeams = function (userId, response) {
       openDb(callback);
     },
     function (db, callback) {
-      db.collection(membershipTableName, function (err, collection) {
-        collection.find({ 'userid': userId }, function (err, cursor) {
+      db.collection(teamTableName, function (err, collection) {
+        collection.find({ 'userid': parseInt(userId) }, function (err, cursor) {
           if (!err) {
             cursor.toArray(function(err, items) {
               if (items.length > 0) {
@@ -205,7 +196,7 @@ exports.getUserTeams = function (userId, response) {
       db.close();
     }
     if (err) {
-      response.writeHead(500, { 'Content-Type': 'text/plain' });
+      response.writeHead(500, { 'Content-Type': 'text/plain', 'Cache-Control': 'no-cache' });
       console.log('Something went wrong with finding the user!');
       console.log(err);
     } else {
@@ -216,7 +207,8 @@ exports.getUserTeams = function (userId, response) {
   });
 };
 
-exports.getData = function(response) {
+//Used to get a specific team
+exports.getTeam = function(userId, teamId, response) {
   async.waterfall([
       function(callback) {
         openDb(callback);
@@ -226,8 +218,8 @@ exports.getData = function(response) {
       function(db, callback) {
       console.log('Trying to get the data');
 
-      db.collection(dataTableName, function(err, collection) {
-        collection.findOne({ 'TeamId': singleDataIdentifier }, function(err, item) {
+      db.collection(teamTableName, function(err, collection) {
+        collection.findOne({ 'userid': parseInt(userId), 'TeamId': teamId }, function(err, item) {
           if (!err) {
             if (item == null) {
               console.log('Did NOT find the data.');
@@ -239,7 +231,7 @@ exports.getData = function(response) {
               response.write(JSON.stringify(item));
             }
 
-                callback(null, db);
+            callback(null, db);
           } else {
             callback(err, db);
           }
@@ -256,14 +248,14 @@ exports.getData = function(response) {
       console.log('Something went wrong with getting the data!');
       console.log(err);
 
-      response.writeHead(404, { 'Content-Type': 'text/plain' });
+      response.writeHead(404, { 'Content-Type': 'text/plain', 'Cache-Control': 'no-cache' });
     }
 
     response.end();
   });
 };
 
-exports.saveData = function(data, response) {
+exports.saveTeam = function(data, userId, teamId, response) {
   async.waterfall([
     function(callback) {
         openDb(callback);
@@ -273,7 +265,7 @@ exports.saveData = function(data, response) {
       function(db, callback) {
         console.log('Saving the data.');
 
-        saveDataInternal(db, data, callback);
+        saveDataInternal(db, data, userId, teamId, callback);
       }
   ], function (err, db) {
     // all done
@@ -285,34 +277,36 @@ exports.saveData = function(data, response) {
       console.log('Something went wrong with saving the data!');
       console.log(err);
 
-      response.writeHead(500, { 'Content-Type': 'text/plain' });
+      response.writeHead(500, { 'Content-Type': 'text/plain', 'Cache-Control': 'no-cache' });
     } else {
-      response.writeHead(200, { 'Content-Type': 'text/plain' });
+      response.writeHead(200, { 'Content-Type': 'text/plain', 'Cache-Control': 'no-cache' });
     }
 
     response.end();
   });
 };
 
-var saveDataInternal = function(db, data, callback) {
+var saveDataInternal = function(db, data, userId, teamId, callback) {
   console.log('Saving data...');
 
   // for now, we'll just out the board and re-add it; no partial updates
-  db.collection(dataTableName, function(err, collection) {
-    collection.findOne({ 'TeamId': singleDataIdentifier }, function(err, item) {
+  db.collection(teamTableName, function(err, collection) {
+    var query = { 'userid': parseInt(userId), 'TeamId': teamId };
+    collection.findOne(query, function(err, item) {
       if (!err) {
         if (item == null) {
           console.log('Seeing the data for the first time, saving it.');
-
+          data.userid = parseInt(userId);
           collection.insert(data);
         } else {
-          collection.remove({ 'TeamId': singleDataIdentifier });
+          collection.remove(query);
+          data.userid = parseInt(userId);
           collection.insert(data);
         }
 
         // create index; if exists, no-op
         // we have to do this *after* a document is first inserted
-        collection.ensureIndex({ 'TeamId': singleDataIdentifier });
+        collection.ensureIndex(query);
 
         console.log('Data saved.');
 

@@ -89,9 +89,19 @@ everyauth.twitter
   .consumerKey('')
   .consumerSecret('')
   .callbackPath('/custom/twitter/callback/path')
-  .findOrCreateUser( function (session, accessToken, accessTokenSecret, twitterUserMetadata) {
-      dal.findOrCreateUser(twitterUserMetadata);
-      return twitterUserMetadata;
+  .findOrCreateUser(function (session, accessToken, accessTokenSecret, twitterUserMetadata) {
+    dal.findOrCreateUser(twitterUserMetadata);
+    return twitterUserMetadata;
+  })
+  .redirectPath('/')
+
+everyauth.facebook
+  .appId('')
+  .appSecret('')
+  .callbackPath('/auth/facebook/callback')
+  .scope('email')
+  .findOrCreateUser(function (session, accessToken, accessTokenExtra, facebookUserMetadata) {
+    return facebookUserMetadata;
   })
   .redirectPath('/')
 

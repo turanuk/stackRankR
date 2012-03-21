@@ -11,10 +11,12 @@ var membershipTableName = 'membership';
 var teamTableName = 'tempTeams';
 var singleDataIdentifier = '1'; // only storing one piece of data in the database; we'll identify it w/ this value
 
-var mongoLabUri = (process.env.MONGOLAB_URI || false);
+// TODO - remove this hack where we check for the specific value of the MONGOLAB_URI once we understand
+// how IIS node process environment variables set by the hoster
+var runningInProduction = (process.env.MONGOLAB_URI && ((process.env.MONGOLAB_URI !== 'TO_BE_REPLACED_BY_IIS_NODE')));
 
-if (mongoLabUri) {
-  var runningInProduction = true;
+if (runningInProduction) {
+  var mongoLabUri = process.env.MONGOLAB_URI;
 
   // trim off the 'mongodb://' piece
   mongoLabUri = mongoLabUri.substring(10);
@@ -43,7 +45,6 @@ if (mongoLabUri) {
   // get the database name
   var databaseName = mongoLabUri;
 } else {
-  var runningInProduction = false;
   var databaseServer = 'localhost';
   var databaseServerPort = 27017;
   var databaseName = 'stackRankR';

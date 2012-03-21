@@ -14,7 +14,6 @@ html
   link(rel='stylesheet', href=base + '/css/bootstrap-responsive.min.css')
   link(rel='stylesheet', href=base + '/css/reset.css')
   link(rel='stylesheet', href=base + '/css/custom.css')
-  link(rel='stylesheet', href='https://s-static.ak.fbcdn.net/rsrc.php/v1/ym/r/JalxMcZOznj.css')
   script(src=base + '/js/jquery-1.7.1.min.js')
   script(src=base + '/js/jquery-ui-1.8.18.custom.min.js')
   script(src=base + '/js/linq.min.js')
@@ -33,9 +32,9 @@ html
             span(class="icon-bar")
           - if (everyauth.twitter && everyauth.twitter.user)
             img(class="avatar", src=everyauth.twitter.user.profile_image_url)
-            a(class="brand", href=base)=everyauth.twitter.user.screen_name
+            a(class="brand", href=base + "/")=everyauth.twitter.user.screen_name
           - else
-            a(class="brand", href=base) stackRankR
+            a(class="brand", href=base + "/") stackRankR
           div(class="nav-collapse")
             ul(class="nav")
               li(class="active")

@@ -1,7 +1,12 @@
-h1 stackRankR
-p Sort it out.
+script(src=base + '/knockout/IndexViewModel.js')
 
-div Here is a list of your boards:
-  ul
-    li 
-      a(href="/team/2") Default Board
+h1 Teams
+
+div(class="iconbar")
+  span(data-bind="click: $root.addTeam", class="icon firstIcon addIcon")
+
+div(class="main")
+  ul(class="teamContainer", data-bind="foreach: $root.teams, sortable: $root")
+    li(class="team")
+      span(class="teamRemoveButton") x
+      a(class="teamName", href=everyauth.twitter.user.id, data-bind="text: Name, linkGenerator: $root")

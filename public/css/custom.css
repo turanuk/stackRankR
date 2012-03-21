@@ -9,8 +9,6 @@
   height: 36px;
 }
 .refreshIcon {
-  margin-left: -10px;
-  clear: both;
   background: url(../img/refresh.png);
 }
 .updateIcon {
@@ -18,6 +16,10 @@
 }
 .addIcon {
   background: url(../img/add.png);
+}
+.firstIcon {
+  clear: both;
+  margin-left: -10px;
 }
 .status {
   clear: both;
@@ -29,7 +31,7 @@
   color: #306816;
 }
 
-/*Main*/
+/* Team Main*/
 .main {
   clear: both;
   margin-top: 15px;
@@ -99,6 +101,38 @@ ul.personContainer {
   float: right;
 }
 
+/* Index Main */
+.teamContainer {
+  margin: 20px 0;
+}
+.team {
+  display: block;
+  margin-bottom: 15px;
+  padding: 15px;
+  border-radius: 10px;
+  width: 225px;
+  color: Black;
+  background-color: #aaa8a8;
+}
+.teamRemoveButton {
+  float: right;
+  display: block;
+  font-size: 20px;
+  font-weight: bold;
+}
+.teamName {
+  text-transform: uppercase;
+  font-weight: bold;
+  font-size: 18px;
+}
+a {
+  text-decoration: none;
+  color: Black;
+}
+a:hover {
+  text-decoration: none;
+  color: #d0cdcd;
+}
 /*jQuery UI hover placeholder*/
 .hoverPlaceholder {
   border-top: 7px solid Black;

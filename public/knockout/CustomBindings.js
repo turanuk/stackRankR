@@ -53,3 +53,16 @@ ko.bindingHandlers.fadeIn = {
     $(element).hide().fadeIn();
   }
 }
+
+ko.bindingHandlers.sortable = {
+  init: function (element, valueAccessor, allBindingsAccessor, model) {
+    $(element).sortable();
+  }
+}
+
+ko.bindingHandlers.linkGenerator = {
+  init: function (element, valueAccessor, allBindingsAccessor, model) {
+    var userId = $(element).attr('href');
+    $(element).attr('href', '/team/' + userId + '/' + model.TeamId())
+  }
+}

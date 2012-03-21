@@ -86,8 +86,8 @@ everyauth
     .registerSuccessRedirect('/');
 
 everyauth.twitter
-  .consumerKey('')
-  .consumerSecret('')
+  .consumerKey('YgN2ffzZ6sunKxT9gs3w')
+  .consumerSecret('4kE6jar9UExNdcirehEt1j6iwhfFHKfDtPfNy5rE')
   .callbackPath('/custom/twitter/callback/path')
   .findOrCreateUser(function (session, accessToken, accessTokenSecret, twitterUserMetadata) {
     dal.findOrCreateUser(twitterUserMetadata);

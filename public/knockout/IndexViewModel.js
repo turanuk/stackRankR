@@ -32,10 +32,7 @@ var IndexViewModel = function (teams) {
 
 /////  CLIENT INIT
 $().ready(function () {
-  //TODO: Populate from server model on refresh
-  var team = new Team(0, 'My First Team');
-  var teams = new Array();
-  teams.push(team);
-
-  ko.applyBindings(new IndexViewModel(teams));
+  $.getJSON('/getUserTeams/', function (data) {
+    ko.applyBindings(new IndexViewModel(data));
+  }); 
 });

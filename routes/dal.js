@@ -7,4 +7,8 @@ module.exports = function (app, dal, authenticatedUser) {
   app.post('/saveData', authenticatedUser, function(req, res){
     dal.saveData(req.body, res);
   });
+
+  app.get('/getUserTeams', authenticatedUser, function(req, res){
+    dal.getUserTeams(req.body, res);
+  });
 }

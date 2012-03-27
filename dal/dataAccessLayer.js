@@ -273,6 +273,7 @@ exports.newTeam = function (userId, response) {
             cursor.toArray(function(err, items) {
               var testData = new createDataTemplate();
               if (items.length > 0) {
+                //TODO: Fix ID generation logic
                 testData.TeamId = items.length.toString();
               }
               testData.userid = userId;

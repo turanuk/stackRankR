@@ -50,8 +50,8 @@ if (runningInProduction) {
   var databaseName = 'stackRankR';
 }
 
-var testData =
-  { 
+var createDataTemplate = function () {
+  return { 
     'TeamId': '0',
     'Name': 'DEX',
     'Rankings': [
@@ -69,7 +69,8 @@ var testData =
       }
     ]
   };
-
+}
+  
 var openDb = function(callback) {
   console.log('Preparing to open connection to database server...');
 
@@ -137,6 +138,7 @@ exports.findOrCreateUser = function (user, response) {
               //Create user's team as well
               db.collection(teamTableName, function (err, teamCollection) {
                 if (!err) {
+                  var testData = createDataTemplate();
                   testData.userid = user.id;
                   teamCollection.insert(testData);
                   teamCollection.ensureIndex({'userid': user.id});
@@ -269,6 +271,7 @@ exports.newTeam = function (userId, response) {
         collection.find({ 'userid': parseInt(userId) }, function(err, cursor) {
           if (!err) {
             cursor.toArray(function(err, items) {
+              var testData = new createDataTemplate();
               if (items.length > 0) {
                 testData.TeamId = items.length.toString();
               }

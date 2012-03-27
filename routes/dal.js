@@ -12,6 +12,10 @@ module.exports = function (app, dal, authenticatedUser) {
     dal.newTeam(req.session.auth.twitter.user.id, res);
   });
 
+  app.post('/deleteTeam/:teamid', authenticatedUser, function(req, res){
+    dal.deleteTeam(req.session.auth.twitter.user.id, req.params.teamid, res);
+  });
+
   app.get('/getUserTeams', authenticatedUser, function(req, res){
     dal.getUserTeams(req.session.auth.twitter.user.id, res);
   });

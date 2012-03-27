@@ -4,13 +4,6 @@
 //Shortcut for unwrapping observables
 var unwrap = ko.utils.unwrapObservable;
 
-/////  MODELS
-var Team = function (TeamId, Name) {
-  var self = this;
-  self.TeamId = ko.observable(TeamId);
-  self.Name = ko.observable(Name);
-}
-
 /////  VIEWMODEL
 var IndexViewModel = function (teams) {
   var self = this;
@@ -23,7 +16,24 @@ var IndexViewModel = function (teams) {
       url: '/newTeam',
       type: 'POST'
     }).done(function (data) {
-      
+      $.getJSON('/getUserTeams', function (data) {
+        if (data) {
+          $('.main').hide();
+          self.teams(data);
+          $('.main').fadeIn();
+        } else {
+          window.location.href = '/';
+        }
+      }); 
+    });
+  }
+
+  self.deleteTeam = function (team) {
+    $.ajax({
+      url: '/deleteTeam/' + team.TeamId,
+      type: 'POST'
+    }).done(function (data) {
+      self.teams.remove(team);
     });
   }
 }
@@ -33,7 +43,7 @@ $().ready(function () {
   $.getJSON('/getUserTeams', function (data) {
     if (data) {
       ko.applyBindings(new IndexViewModel(data));
-      $(".main").fadeIn();
+      $('.main').fadeIn();
     } else {
       window.location.href = '/';
     }

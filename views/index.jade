@@ -8,5 +8,5 @@ div(class="iconbar")
 div(class="main")
   ul(class="teamContainer", data-bind="foreach: $root.teams")
     li(class="team")
-      span(class="teamRemoveButton") x
+      span(class="teamRemoveButton", data-bind="click: $root.deleteTeam") x
       a(class="teamName", href=everyauth.twitter.user.id, data-bind="text: Name, linkGenerator: $root")

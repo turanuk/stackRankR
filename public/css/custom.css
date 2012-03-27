@@ -35,8 +35,14 @@
 .main {
   clear: both;
   margin-top: 15px;
+  display: none;
+}
+.teamNameMain {
+  display: inline;
+  font-size: 24px;
 }
 .rankingContainer {
+  margin-top: 15px;
   width: 1500px;
 }
 .rankingContainer > div:not(:first-child) {

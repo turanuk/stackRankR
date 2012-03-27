@@ -19,20 +19,23 @@ var IndexViewModel = function (teams) {
   self.error = ko.observable();
 
   self.addTeam = function (model) {
-    self.teams.push(new Team(self.teams().length, 'New Team'));
-    self.updateTeamIds();
-  }
-
-  self.updateTeamIds = function () {
-    for (var i = 0; i < self.teams().length; i++) {
-      self.teams()[i].TeamId(i);
-    }
+    $.ajax({
+      url: '/newTeam',
+      type: 'POST'
+    }).done(function (data) {
+      
+    });
   }
 }
 
 /////  CLIENT INIT
 $().ready(function () {
   $.getJSON('/getUserTeams', function (data) {
-    ko.applyBindings(new IndexViewModel(data));
+    if (data) {
+      ko.applyBindings(new IndexViewModel(data));
+      $(".main").fadeIn();
+    } else {
+      window.location.href = '/';
+    }
   }); 
 });

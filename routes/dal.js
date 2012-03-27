@@ -8,6 +8,10 @@ module.exports = function (app, dal, authenticatedUser) {
     dal.saveTeam(req.body, req.session.auth.twitter.user.id, req.params.teamid, res);
   });
 
+  app.post('/newTeam', authenticatedUser, function(req, res){
+    dal.newTeam(req.session.auth.twitter.user.id, res);
+  });
+
   app.get('/getUserTeams', authenticatedUser, function(req, res){
     dal.getUserTeams(req.session.auth.twitter.user.id, res);
   });

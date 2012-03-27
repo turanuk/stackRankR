@@ -184,6 +184,7 @@ $().ready(function () {
       if (data) {
         var outputTeam = viewModel.createTeamFromObject(data);
         ko.applyBindings(new TeamViewModel(outputTeam));
+        $(".main").fadeIn();
       } else {
         window.location.href = '/';
       }

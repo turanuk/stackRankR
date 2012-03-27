@@ -256,6 +256,55 @@ exports.getTeam = function(userId, teamId, response) {
   });
 };
 
+//Used to create a new team for a user
+exports.newTeam = function (userId, response) {
+    async.waterfall([
+      function(callback) {
+        openDb(callback);
+      },
+
+      // get the board
+      function(db, callback) {
+      db.collection(teamTableName, function(err, collection) {
+        collection.find({ 'userid': parseInt(userId) }, function(err, cursor) {
+          if (!err) {
+            cursor.toArray(function(err, items) {
+              if (items.length > 0) {
+                testData.TeamId = items.length.toString();
+              }
+              testData.userid = userId;
+              collection.insert(testData, function (err, secondary) {
+                console.log(err);
+              });
+              collection.ensureIndex({'userid': userId, 'TeamId': items.length.toString()});
+              response.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache' });
+              response.write(JSON.stringify(testData));
+              callback(null, db, items);
+            });
+          } else {
+            callback(err, db);
+          }
+        });
+      });
+      }    
+  ], function (err, db) {
+    // all done
+    if (db && db.close) {
+      db.close();
+    }
+
+    if (err) {
+      console.log('Something went wrong with getting the data!');
+      console.log(err);
+
+      response.writeHead(404, { 'Content-Type': 'text/plain', 'Cache-Control': 'no-cache' });
+    }
+
+    response.end();
+  });
+}
+
+//Saves off an entire team for a user
 exports.saveTeam = function(data, userId, teamId, response) {
   async.waterfall([
     function(callback) {

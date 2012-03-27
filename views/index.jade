@@ -6,7 +6,7 @@ div(class="iconbar")
   span(data-bind="click: $root.addTeam", class="icon firstIcon addIcon")
 
 div(class="main")
-  ul(class="teamContainer", data-bind="foreach: $root.teams, sortable: $root")
+  ul(class="teamContainer", data-bind="foreach: $root.teams")
     li(class="team")
       span(class="teamRemoveButton") x
       a(class="teamName", href=everyauth.twitter.user.id, data-bind="text: Name, linkGenerator: $root")

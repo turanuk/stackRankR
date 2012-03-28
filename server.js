@@ -6,6 +6,25 @@ var app = module.exports = express.createServer();
 everyauth.helpExpress(app);
 
 /**
+* SOCKET.IO
+* -------------------------------------------------------------------------------------------------
+**/
+
+var socketIo = require('socket.io').listen(app);
+
+socketIo.sockets.on('connection', function (socket) {
+  console.log('Socket.IO: Client connected...');
+
+  socket.on('dataChanged', function (data) {
+    console.log('Socket.IO: Data has changed...');
+
+    socket.broadcast.emit('sync');
+  })
+});
+
+/** End SOCKET.IO **/
+
+/**
 * AUTHENTICATION
 * -------------------------------------------------------------------------------------------------
 * set up basic authentication

@@ -1,4 +1,13 @@
 script(src=base + '/knockout/TeamViewModel.js')
+script(src=base + '/socket.io/socket.io.js')
+
+script(type='text/javascript')
+  var socket = io.connect('http://localhost:3000');
+
+  socket.on('sync', function (data) {
+    // TOOD: keep it simple, refresh the team data
+    alert('Socket.IO: Need to refresh the data');
+  });
 
 div(class="iconbar")
   span(data-bind="click: $root.refreshTeam", class="icon firstIcon refreshIcon")

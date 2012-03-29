@@ -9,7 +9,8 @@
     "jade": ">=0.20.3",
     "mongodb": ">= 0.9.9-6",
     "async": ">= 0.1.18",
-    "everyauth": ">= 0.2.32"
+    "everyauth": ">= 0.2.32",
+    "redis": ">= 0.7.1"
   },
   "devDependencies": {
   }

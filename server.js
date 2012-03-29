@@ -26,8 +26,6 @@ socketIo.sockets.on('connection', function (socket) {
   })
 });
 
-dal.Foo.Bar = 'hi';
-
 /** End SOCKET.IO **/
 
 /**

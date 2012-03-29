@@ -10,20 +10,64 @@ everyauth.helpExpress(app);
 * -------------------------------------------------------------------------------------------------
 **/
 var socketIo = require('socket.io').listen(app);
+var redis = require('redis'),
+    redisSubscribeClient = redis.createClient(),
+    redisPublishClient = redis.createClient();
+
+redisSubscribeClient.on('error', function (err) {
+    console.log('Redis: Subscribe client error ' + err);
+});
+
+redisPublishClient.on('error', function (err) {
+    console.log('Redis: Publish client error ' + err);
+});
+
+
+var connectedUsers = {};
 
 socketIo.set('log level', 1);
 
 socketIo.sockets.on('connection', function (socket) {
   console.log('Socket.IO: Client connected...');
 
+  //Challenge for user to identify themselves once they connect to a team
+  socket.emit('identifyUser');
+
+  //Store a user connection in a look-up table (user identifies themselves)
+  socket.on('userConnected', function (incoming) {
+    if (!connectedUsers[incoming.teamId]) {
+      connectedUsers[incoming.teamId] = new Array();
+    }
+    connectedUsers[incoming.teamId].push(socket.id);
+    console.log('stored socket id of ' + socket.id);
+  });
+
+  //Clean up user once they disconnect
+  socket.on('disconnect', function () {
+    console.log('disconnected' + socket.id);
+    //TODO: Remove the socket id from the array of connected users
+  });
+
   // if we drive the sync process from the server on "team save" then I
   // don't think we need this code b/c we can do the emit the 'sync' operation
   // from there
   socket.on('dataChanged', function (data) {
     console.log('Socket.IO: Data has changed. Syncing to clients...');
-
-    socket.broadcast.emit('sync');
+    //Create sub if not created (idempotent call)
+    redisSubscribeClient.subscribe(data.teamId);
+    //Get team data from db (hardcode username)
+    dal.getTeamRedis('15250013', data.teamId, function (team) {
+      //Publish to redis sub
+      redisPublishClient.publish(data.teamId, team);
+    });
   })
+
+  //Redis: on a publish operation, call socket.send to send down teamId to the client - client will just do a call
+  //to the DAL endpoint in v0.1
+  redisSubscribeClient.on('message', function (subscription, message) {
+    console.log('Redis: Subscribe client received message for subscription ' + subscription);
+    socket.emit('updateAvailable', message);
+  });
 });
 
 /** End SOCKET.IO **/
@@ -109,8 +153,8 @@ everyauth
     .registerSuccessRedirect('/');
 
 everyauth.twitter
-  .consumerKey('')
-  .consumerSecret('')
+  .consumerKey('YgN2ffzZ6sunKxT9gs3w')
+  .consumerSecret('4kE6jar9UExNdcirehEt1j6iwhfFHKfDtPfNy5rE')
   .callbackPath('/custom/twitter/callback/path')
   .findOrCreateUser(function (session, accessToken, accessTokenSecret, twitterUserMetadata) {
     dal.findOrCreateUser(twitterUserMetadata);

@@ -6,36 +6,6 @@ var mongo = require('mongodb'),
 
 var async = require('async');
 
-/**
-* REDIS
-*
-* We have to use separate Redis clients for subscribe and publish operations. That's a Redis
-* implementation detail.
-* -------------------------------------------------------------------------------------------------
-**/
-
-var redis = require('redis'),
-    redisSubscribeClient = redis.createClient(),
-    redisPublishClient = redis.createClient();
-
-redisSubscribeClient.on('error', function (err) {
-    console.log('Redis: Subscribe client error ' + err);
-});
-
-redisPublishClient.on('error', function (err) {
-    console.log('Redis: Publish client error ' + err);
-});
-
-redisSubscribeClient.on('message', function (subscription, message) {
-    console.log('Redis: Subscribe client received message for subscription ' + subscription);
-
-    // socketIo object is not defined here; need to get a reference to it
-    // can probably just do the broadcast at this point
-    socketIo.socket.emit('sync');
-});
-
-/** End REDIS **/
-
 var dataTableName = 'teams';  // single table where we're storing all of the data
 var membershipTableName = 'membership';
 var teamTableName = 'tempTeams';
@@ -247,16 +217,6 @@ exports.getTeam = function(userId, teamId, response) {
         openDb(callback);
     },
 
-      // create Redis subscription to the team
-      function(db, callback) {
-        console.log('Redis: Creating subscription to ' + teamId );
-
-        // subscribe operation is idempotent
-        redisSubscribeClient.subscribe(teamId);
-
-        callback(null, db);
-      },
-
       // get the board
       function(db, callback) {
       console.log('Trying to get the data');
@@ -297,6 +257,45 @@ exports.getTeam = function(userId, teamId, response) {
     response.end();
   });
 };
+
+//Used to get a specific team, internal
+exports.getTeamRedis = function (userId, teamId, finalCallback) {
+  async.waterfall([
+      function(callback) {
+        openDb(callback);
+    },
+
+      // get the board
+      function(db, callback) {
+      db.collection(teamTableName, function(err, collection) {
+        collection.findOne({ 'userid': parseInt(userId), 'TeamId': teamId }, function(err, item) {
+          if (!err) {
+            if (item == null) {
+              console.log('Did NOT find the data.');
+            } else {
+              console.log('Found the data.');
+            }
+            callback(null, db, JSON.stringify(item));
+          } else {
+            callback(err, db);
+          }
+        });
+      });
+      }    
+  ], function (err, db, result) {
+    // all done
+    if (db && db.close) {
+      db.close();
+    }
+
+    if (err) {
+      console.log('Something went wrong with getting the data!');
+      console.log(err);
+    } else {
+      finalCallback(result);
+    }
+  });
+}
 
 //Used to create a new team for a user
 exports.newTeam = function (userId, response) {
@@ -388,17 +387,6 @@ exports.saveTeam = function(data, userId, teamId, response) {
     function(callback) {
         openDb(callback);
     },
-
-      // use Redis to publish the changes
-      function(db, callback) {
-        console.log('Redis: Publishing to subscription ' + teamId );
-
-        // not passing any data for the publish operation since we're using it to trigger
-        // another event
-        redisPublishClient.publish(teamId, "");
-
-        callback(null, db);
-      },
 
       // save the board
       function(db, callback) {

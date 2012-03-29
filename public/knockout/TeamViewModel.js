@@ -83,8 +83,14 @@ var TeamViewModel = function (team) {
     }
   }
 
+  socket.on('updateAvailable', function (data) {
+    var outputTeam = self.createTeamFromObject(JSON.parse(data));
+    self.team(outputTeam);
+    self.status('Refreshed');
+  });
+
   //Pulling the view model from the server
-  self.refreshTeam = function () {
+  self.refreshTeam = function () {    
     $.getJSON('/getTeam/' + self.team().TeamId, 
       function (data) {
         if (data) {
@@ -103,6 +109,7 @@ var TeamViewModel = function (team) {
     $.post('/saveTeam/' + self.team().TeamId, outputTeam, 
       function (data) {
         self.status('Saved');
+        socket.emit('dataChanged', { teamId: outputTeam.TeamId })
       }
     );
   }
@@ -185,10 +192,14 @@ $().ready(function () {
       if (data) {
         var outputTeam = viewModel.createTeamFromObject(data);
         ko.applyBindings(new TeamViewModel(outputTeam));
+        socket.on('identifyUser', function (incoming) {
+          socket.emit('userConnected', { teamId: outputTeam.TeamId })
+        });
         $(".main").fadeIn();
       } else {
         window.location.href = '/';
       }
     }
   );
+
 });

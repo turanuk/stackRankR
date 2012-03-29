@@ -9,18 +9,24 @@ everyauth.helpExpress(app);
 * SOCKET.IO
 * -------------------------------------------------------------------------------------------------
 **/
-
 var socketIo = require('socket.io').listen(app);
+
+socketIo.set('log level', 1);
 
 socketIo.sockets.on('connection', function (socket) {
   console.log('Socket.IO: Client connected...');
 
+  // if we drive the sync process from the server on "team save" then I
+  // don't think we need this code b/c we can do the emit the 'sync' operation
+  // from there
   socket.on('dataChanged', function (data) {
-    console.log('Socket.IO: Data has changed...');
+    console.log('Socket.IO: Data has changed. Syncing to clients...');
 
     socket.broadcast.emit('sync');
   })
 });
+
+dal.Foo.Bar = 'hi';
 
 /** End SOCKET.IO **/
 

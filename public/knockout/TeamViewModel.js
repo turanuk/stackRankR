@@ -42,9 +42,6 @@ var TeamViewModel = function (team) {
     ranking.People.remove(person);
     ranking.People.splice(newIndex, 0, person);
     self.updatePersonIds(ranking);
-
-    // TODO: do a similar operation for every change; maybe easy to centralize this
-    socket.emit('dataChanged')
   }
 
   self.movePerson = function (newIndex, personId, sourceRankingId, targetRankingId) {

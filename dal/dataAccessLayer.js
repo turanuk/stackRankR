@@ -6,6 +6,36 @@ var mongo = require('mongodb'),
 
 var async = require('async');
 
+/**
+* REDIS
+*
+* We have to use separate Redis clients for subscribe and publish operations. That's a Redis
+* implementation detail.
+* -------------------------------------------------------------------------------------------------
+**/
+
+var redis = require('redis'),
+    redisSubscribeClient = redis.createClient(),
+    redisPublishClient = redis.createClient();
+
+redisSubscribeClient.on('error', function (err) {
+    console.log('Redis: Subscribe client error ' + err);
+});
+
+redisPublishClient.on('error', function (err) {
+    console.log('Redis: Publish client error ' + err);
+});
+
+redisSubscribeClient.on('message', function (subscription, message) {
+    console.log('Redis: Subscribe client received message for subscription ' + subscription);
+
+    // socketIo object is not defined here; need to get a reference to it
+    // can probably just do the broadcast at this point
+    socketIo.socket.emit('sync');
+});
+
+/** End REDIS **/
+
 var dataTableName = 'teams';  // single table where we're storing all of the data
 var membershipTableName = 'membership';
 var teamTableName = 'tempTeams';
@@ -217,6 +247,16 @@ exports.getTeam = function(userId, teamId, response) {
         openDb(callback);
     },
 
+      // create Redis subscription to the team
+      function(db, callback) {
+        console.log('Redis: Creating subscription to ' + teamId );
+
+        // subscribe operation is idempotent
+        redisSubscribeClient.subscribe(teamId);
+
+        callback(null, db);
+      },
+
       // get the board
       function(db, callback) {
       console.log('Trying to get the data');
@@ -348,6 +388,17 @@ exports.saveTeam = function(data, userId, teamId, response) {
     function(callback) {
         openDb(callback);
     },
+
+      // use Redis to publish the changes
+      function(db, callback) {
+        console.log('Redis: Publishing to subscription ' + teamId );
+
+        // not passing any data for the publish operation since we're using it to trigger
+        // another event
+        redisPublishClient.publish(teamId, "");
+
+        callback(null, db);
+      },
 
       // save the board
       function(db, callback) {

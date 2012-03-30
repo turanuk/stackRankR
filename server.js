@@ -22,8 +22,6 @@ var pub = redis.createClient();
 var sub = redis.createClient();
 var store = redis.createClient();
 
-var connectedUsers = {};
-
 socketIo.set('log level', 1);
 socketIo.set('store', new RedisStore({redisPub: pub, redisSub:sub, redisClient:store}));
 

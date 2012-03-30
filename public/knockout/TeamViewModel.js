@@ -83,7 +83,7 @@ var TeamViewModel = function (team) {
     }
   }
 
-  socket.on('updateAvailable', function (data) {
+  socket.on('message', function (data) {
     var outputTeam = self.createTeamFromObject(JSON.parse(data));
     self.team(outputTeam);
     self.status('Refreshed');

@@ -1,32 +1,50 @@
 var express = require('express');
 var dal = require("./dal/dataAccessLayer.js");
 var everyauth = require('everyauth');
+var MemoryStore = express.session.MemoryStore;
+var sessionStore = new MemoryStore();
+var Session = require('connect').middleware.session.Session;
+
 
 var app = module.exports = express.createServer();
 everyauth.helpExpress(app);
 
+//
 /**
 * SOCKET.IO
 * -------------------------------------------------------------------------------------------------
 **/
 var socketIo = require('socket.io').listen(app);
-var redis = require('redis'),
-    redisSubscribeClient = redis.createClient(),
-    redisPublishClient = redis.createClient();
-
-redisSubscribeClient.on('error', function (err) {
-    console.log('Redis: Subscribe client error ' + err);
-});
-
-redisPublishClient.on('error', function (err) {
-    console.log('Redis: Publish client error ' + err);
-});
-
+var redis = require('redis');
+var RedisStore = require('socket.io/lib/stores/redis');
+var parseCookie = require('connect').utils.parseCookie;
+var pub = redis.createClient();
+var sub = redis.createClient();
+var store = redis.createClient();
 
 var connectedUsers = {};
 
 socketIo.set('log level', 1);
+socketIo.set('store', new RedisStore({redisPub: pub, redisSub:sub, redisClient:store}));
 
+//Need to add session information to the socket.io request
+socketIo.set('authorization', function (handshake, callback) {
+  if (handshake.headers.cookie) {
+    handshake.cookie = parseCookie(handshake.headers.cookie);
+    handshake.sessionId = handshake.cookie['express.sid'];
+    handshake.sessionStore = sessionStore;
+    sessionStore.get(handshake.sessionId, function (err, session) {
+      if (err || !session) {
+        callback('Error', false)
+      } else {
+        handshake.session = new Session(handshake, session);
+        callback(null, true);
+      }
+    });
+  } else {
+    callback('No cookie', false);
+  }
+});
 socketIo.sockets.on('connection', function (socket) {
   console.log('Socket.IO: Client connected...');
 
@@ -35,39 +53,25 @@ socketIo.sockets.on('connection', function (socket) {
 
   //Store a user connection in a look-up table (user identifies themselves)
   socket.on('userConnected', function (incoming) {
-    if (!connectedUsers[incoming.teamId]) {
-      connectedUsers[incoming.teamId] = new Array();
-    }
-    connectedUsers[incoming.teamId].push(socket.id);
-    console.log('stored socket id of ' + socket.id);
+    //Join a channel for the teamId
+    socket.join(incoming.teamId);
+    socket.team = incoming.teamId;
   });
 
   //Clean up user once they disconnect
   socket.on('disconnect', function () {
-    console.log('disconnected' + socket.id);
-    //TODO: Remove the socket id from the array of connected users
+    console.log('disconnected socket id: ' + socket.id);
+    socket.leave(socket.team);
   });
 
-  // if we drive the sync process from the server on "team save" then I
-  // don't think we need this code b/c we can do the emit the 'sync' operation
-  // from there
+  //When the data changes we need to update others viewing the team
   socket.on('dataChanged', function (data) {
-    console.log('Socket.IO: Data has changed. Syncing to clients...');
-    //Create sub if not created (idempotent call)
-    redisSubscribeClient.subscribe(data.teamId);
-    //Get team data from db (hardcode username)
-    dal.getTeamRedis('15250013', data.teamId, function (team) {
-      //Publish to redis sub
-      redisPublishClient.publish(data.teamId, team);
+    //Get team data from db and broadcast to users looking at the team
+    var userId = socket.handshake.session.auth.twitter.user.id;
+    dal.getTeamRedis(userId, data.teamId, function (team) {
+      socket.broadcast.to(data.teamId).json.send(team);
     });
   })
-
-  //Redis: on a publish operation, call socket.send to send down teamId to the client - client will just do a call
-  //to the DAL endpoint in v0.1
-  redisSubscribeClient.on('message', function (subscription, message) {
-    console.log('Redis: Subscribe client received message for subscription ' + subscription);
-    socket.emit('updateAvailable', message);
-  });
 });
 
 /** End SOCKET.IO **/
@@ -185,7 +189,7 @@ app.configure(function() {
     app.use(require('./middleware/locals'));
     app.use(express.cookieParser());
     app.use(express.static(__dirname + '/public'));
-    app.use(express.session({secret: 'mysecret'}));
+    app.use(express.session({secret: 'mysecret', store: sessionStore, key: 'express.sid' }));
     app.use(everyauth.middleware());
     app.use(app.router);
 });

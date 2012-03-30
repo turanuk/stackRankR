@@ -268,7 +268,7 @@ exports.getTeamRedis = function (userId, teamId, finalCallback) {
       // get the board
       function(db, callback) {
       db.collection(teamTableName, function(err, collection) {
-        collection.findOne({ 'userid': parseInt(userId), 'TeamId': teamId }, function(err, item) {
+        collection.findOne({ 'userid': userId, 'TeamId': teamId }, function(err, item) {
           if (!err) {
             if (item == null) {
               console.log('Did NOT find the data.');

@@ -9,14 +9,26 @@ var Person = function (PersonId, Name) {
   var self = this;
   self.PersonId = ko.observable(PersonId);
   self.Name = ko.observable(Name);
+  self.Name.subscribe(function () {
+    hasChanges(hasChanges() + 1);
+  });
   self.EditPersonName = ko.observable(false);
 }
 
 var Ranking = function (RankingId, Name, People) {
   var self = this;
   self.RankingId = ko.observable(RankingId);
+  self.RankingId.subscribe(function () {
+    hasChanges(hasChanges() + 1);
+  });
   self.Name = ko.observable(Name);
+  self.Name.subscribe(function () {
+    hasChanges(hasChanges() + 1);
+  });
   self.People = ko.observableArray(People);
+  self.People.subscribe(function () {
+    hasChanges(hasChanges() + 1);
+  });
   self.EditRankingName = ko.observable(false);
 }
 
@@ -24,9 +36,17 @@ var Team = function (TeamId, Name, Rankings) {
   var self = this;
   self.TeamId = TeamId;
   self.Name = ko.observable(Name);
+  self.Name.subscribe(function () {
+    hasChanges(hasChanges() + 1);
+  });
   self.Rankings = ko.observableArray(Rankings);
+  self.Rankings.subscribe(function () {
+    hasChanges(hasChanges() + 1);
+  });
   self.EditTeamName = ko.observable(false);
 }
+
+var hasChanges = ko.observable(0);
 
 /////  VIEWMODEL
 var TeamViewModel = function (team) {
@@ -34,6 +54,7 @@ var TeamViewModel = function (team) {
   self.team = ko.observable(team);
   self.status = ko.observable();
   self.error = ko.observable();
+
 
   //Functions called from custom binding that keep view and client side object model in sync
   self.reorderPerson = function (newIndex, personId, rankingId) {
@@ -157,6 +178,7 @@ var TeamViewModel = function (team) {
         });
       }
       var ranking = new Ranking(state.RankingId, state.Name, people);
+      self.updatePersonIds(ranking);
       rankings.push(ranking);
     });
 
@@ -165,7 +187,7 @@ var TeamViewModel = function (team) {
 
   //For pushing to the server
   self.createObjectFromTeam = function (team) {
-    var outputTeam = { 'TeamId': self.team().TeamId, 'Name': team().Name() };
+    var outputTeam = { 'TeamId': team().TeamId, 'Name': team().Name() };
     var rankings = unwrap(team().Rankings());
     var rankingArray = new Array();
     $.each(rankings, function (i, state) {
@@ -191,7 +213,11 @@ $().ready(function () {
     function (data) {
       if (data) {
         var outputTeam = viewModel.createTeamFromObject(data);
-        ko.applyBindings(new TeamViewModel(outputTeam));
+        var thisPageViewModel = new TeamViewModel(outputTeam);
+        hasChanges.subscribe(function () {
+          thisPageViewModel.saveTeam();
+        });
+        ko.applyBindings(thisPageViewModel);
         socket.on('identifyUser', function (incoming) {
           socket.emit('userConnected', { teamId: outputTeam.TeamId })
         });
@@ -201,5 +227,4 @@ $().ready(function () {
       }
     }
   );
-
 });

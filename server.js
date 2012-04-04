@@ -23,6 +23,12 @@ var sub = redis.createClient();
 var store = redis.createClient();
 
 socketIo.set('log level', 1);
+
+//****************************************START AZURE WEB ROLE COMPATIBILITY HOOK******************
+socketIo.set('transports', ['xhr-polling']);
+socketIo.set('polling duration', 10);
+//****************************************END AZURE WEB ROLE COMPATIBILITY HOOK********************
+
 socketIo.set('store', new RedisStore({redisPub: pub, redisSub:sub, redisClient:store}));
 
 //Need to add session information to the socket.io request

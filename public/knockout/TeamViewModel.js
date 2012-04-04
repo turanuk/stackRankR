@@ -142,7 +142,7 @@ var TeamViewModel = function (team) {
     ranking.People.push(personToAdd);
   }
   self.removePersonFromRanking = function (person, element) {
-    var rankingId = $($(element.currentTarget).parents('ul')).attr('data-RankingId');
+    var rankingId = $($(element).parents('ul')).attr('data-RankingId');
     var ranking = self.getRankingById(rankingId);
     ranking.People.remove(person);
     self.updatePersonIds(ranking);

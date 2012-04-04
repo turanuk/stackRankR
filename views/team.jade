@@ -5,9 +5,9 @@ script(type='text/javascript')
   var socket = io.connect('http://localhost:3000');
 
 div(class="iconbar")
-  span(data-bind="click: $root.refreshTeam", class="icon firstIcon refreshIcon")
-  span(data-bind="click: $root.saveTeam", class="icon updateIcon")
-  span(data-bind="click: $root.addRanking", class="icon addIcon")
+  a(href="#", data-bind="click: $root.refreshTeam", class="icon firstIcon refreshIcon")
+  a(href="#", data-bind="click: $root.saveTeam", class="icon updateIcon")
+  a(href="#", data-bind="click: $root.addRanking", class="icon addIcon")
 
 div(data-bind="text: status, fadeIn: status", class="status")
 
@@ -20,10 +20,13 @@ div(class="main")
         div(class="rankingbackground")
           span(data-bind="text: Name, click: $root.editRankingName, visible: !EditRankingName()")
           input(type="text", class="rankingEditName", data-bind="value: Name, valueUpdate: 'afterkeydown', selectText: $parent, visible: EditRankingName, hasfocus: EditRankingName")
-          span(class="addPerson", data-bind="click: $root.newPersonToRanking, disableSelection: $parent") +
+          a(href="#", class="addPerson", data-bind="click: $root.newPersonToRanking, disableSelection: $parent") +
           ul(class="personContainer connectedSortable", data-bind="foreach: People, rankingList: $parent, attr: { 'data-RankingId' : RankingId }")
             li(class="person", data-bind="attr : { 'id': PersonId }")
-              span(class="personRemoveButton", data-bind="click: $root.removePersonFromRanking") x
+              a(href="#", class="personRemoveButton", data-bind="deletePrompt: $root") x
               div(class="personName", data-bind="text: Name, click: $root.editPersonName, visible: !EditPersonName()")
               input(type="text", class="personEditName", data-bind="value: Name, valueUpdate: 'afterkeydown', selectText: $parent, visible: EditPersonName, hasfocus: EditPersonName")
-          span(class="deleteRanking", data-bind="click: $root.deleteRanking, disableSelection: $parent") Delete Ranking
+          a(href="#", class="deleteRanking", data-bind="deletePrompt: $root") Delete Ranking
+
+div(class='dialog-delete-element', style='display:none', title='Delete')
+  p Are you sure?

@@ -8,5 +8,8 @@ div(class="iconbar")
 div(class="main")
   ul(class="teamContainer", data-bind="foreach: $root.teams")
     li(class="team")
-      span(class="teamRemoveButton", data-bind="click: $root.deleteTeam") x
+      a(href="#", class="teamRemoveButton", data-bind="deletePrompt: $root") x
       a(class="teamName", href=everyauth.twitter.user.id, data-bind="text: Name, linkGenerator: $root")
+
+div(class='dialog-delete-element', style='display:none', title='Delete')
+  p Are you sure?

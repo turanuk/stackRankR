@@ -83,86 +83,11 @@ socketIo.sockets.on('connection', function (socket) {
 /**
 * AUTHENTICATION
 * -------------------------------------------------------------------------------------------------
-* set up basic authentication
+* set up authentication using Twitter and Azure ACS
 **/
-var usersById = {};
-var nextUserId = 0;
-
-function addUser (source, sourceUser) {
-  var user;
-  if (arguments.length === 1) { // password-based
-    user = sourceUser = source;
-    user.id = ++nextUserId;
-    return usersById[nextUserId] = user;
-  } else { // non-password-based
-    user = usersById[++nextUserId] = {id: nextUserId};
-    user[source] = sourceUser;
-  }
-  return user;
-}
-
-var usersByLogin = {
-    'stackrankr': addUser({login: 'stackrankr', password: 'stackrankr'})
-  };
-
-everyauth
-  .password
-    .loginWith('email')
-    .getLoginPath('/login')
-    .postLoginPath('/login')
-    .loginView('login.jade')
-    .loginLocals( function (req, res, done) {
-      setTimeout( function () {
-        done(null, {
-          title: 'Login'
-        });
-      }, 200);
-    })
-    .authenticate( function (login, password) {
-      var errors = [];
-      if (!login) errors.push('Missing login');
-      if (!password) errors.push('Missing password');
-      if (errors.length) return errors;
-      var user = usersByLogin[login];
-      if (!user) return ['Login failed'];
-      if (user.password !== password) return ['Login failed'];
-      return user;
-    })
-
-    .getRegisterPath('/register')
-    .postRegisterPath('/register')
-    .registerView('register.jade')
-//    .registerLocals({
-//      title: 'Register'
-//    })
-//    .registerLocals(function (req, res) {
-//      return {
-//        title: 'Sync Register'
-//      }
-//    })
-    .registerLocals( function (req, res, done) {
-      setTimeout( function () {
-        done(null, {
-          title: 'Async Register'
-        });
-      }, 200);
-    })
-    .validateRegistration( function (newUserAttrs, errors) {
-      var login = newUserAttrs.login;
-      if (usersByLogin[login]) errors.push('Login already taken');
-      return errors;
-    })
-    .registerUser( function (newUserAttrs) {
-      var login = newUserAttrs[this.loginKey()];
-      return usersByLogin[login] = addUser(newUserAttrs);
-    })
-
-    .loginSuccessRedirect('/')
-    .registerSuccessRedirect('/');
-
 everyauth.twitter
-  .consumerKey('YgN2ffzZ6sunKxT9gs3w')
-  .consumerSecret('4kE6jar9UExNdcirehEt1j6iwhfFHKfDtPfNy5rE')
+  .consumerKey('')
+  .consumerSecret('')
   .callbackPath('/custom/twitter/callback/path')
   .findOrCreateUser(function (session, accessToken, accessTokenSecret, twitterUserMetadata) {
     dal.findOrCreateUser(twitterUserMetadata);
@@ -170,15 +95,18 @@ everyauth.twitter
   })
   .redirectPath('/')
 
-everyauth.facebook
-  .appId('')
-  .appSecret('')
-  .callbackPath('/auth/facebook/callback')
-  .scope('email')
-  .findOrCreateUser(function (session, accessToken, accessTokenExtra, facebookUserMetadata) {
-    return facebookUserMetadata;
+everyauth.azureacs
+  .identityProviderUrl('')
+  .entryPath('/auth/azureacs')
+  .callbackPath('/auth/azureacs/callback')
+  .signingKey('')
+  .realm('http://localhost:3000/')
+  .homeRealm('')
+  .tokenFormat('swt')
+  .findOrCreateUser(function (session, acsUser) {
+    return acsUser;
   })
-  .redirectPath('/')
+  .redirectPath('/');
 
 /**
 * CONFIGURATION

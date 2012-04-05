@@ -1,24 +1,13 @@
-link(rel='stylesheet', href='https://s-static.ak.fbcdn.net/rsrc.php/v1/ym/r/JalxMcZOznj.css')
-//
-  - if ('undefined' !== typeof errors && errors.length)
-    ul#errors
-      - each error in errors
-        li.error= error
-//
-  form(action='/login', method='post')
-    #login
-      label(for=everyauth.password.loginFormFieldName) Login
-      input(type='text', name=everyauth.password.loginFormFieldName, value=email)
-    #password
-      label(for=everyauth.password.passwordFormFieldName) Password
-      input(type='password', name=everyauth.password.passwordFormFieldName)
-    #submit
-      input(type='submit', value="Login") Login
+- if ('undefined' !== typeof errors && errors.length)
+  ul#errors
+    - each error in errors
+      li.error= error
+
 
 #twitter-login
   a(href='auth/twitter')
     img(style='border: 0px', src='https://si0.twimg.com/images/dev/buttons/sign-in-with-twitter-l.png')
 
-#facebook-login
-    a(class="fb_button fb_button_small", href='/auth/facebook')
-      span(class="fb_button_text") Login with Facebook
+#azureacs-login
+    a(href='/auth/azureacs', style='border: 0px')
+      img(style='border: 0px', src=base + 'img/ACS.png')

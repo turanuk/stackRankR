@@ -71,9 +71,7 @@ ko.bindingHandlers.deletePrompt = {
   init: function (element, valueAccessor, allBindingsAccessor, model) {
     $(element).click(function () {
       var viewModel = valueAccessor();
-      var deleteFunction = '';
-      var objectType = '';
-      var objectName = '';
+      var deleteFunction, objectType, objectName;
       if (model.RankingId) {
         objectType = 'ranking';
         objectName = model.Name();

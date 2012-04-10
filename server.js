@@ -9,6 +9,7 @@ everyauth.helpExpress(app);
 var redis = require('redis');
 var RedisStore = require('socket.io/lib/stores/redis');
 var parseCookie = require('connect').utils.parseCookie;
+var socketIo = require('socket.io').listen(app);
 
 //
 /**
@@ -51,34 +52,31 @@ pub.auth(key, function () {
 * -------------------------------------------------------------------------------------------------
 **/
 var socketIoSetup = function (pub, sub, store) {
-  var socketIo = require('socket.io').listen(app);
-  socketIo.set('log level', 1);
-
-  //****************************************START AZURE WEB ROLE COMPATIBILITY HOOK******************
-  socketIo.set('transports', ['xhr-polling']);
-  socketIo.set('polling duration', 10);
-  //****************************************END AZURE WEB ROLE COMPATIBILITY HOOK********************
   socketIo.set('store', new RedisStore({ redisPub: pub, redisSub: sub, redisClient: store}));
-
-  //Need to add session information to the socket.io request
-  socketIo.set('authorization', function (handshake, callback) {
-    if (handshake.headers.cookie) {
-      handshake.cookie = parseCookie(handshake.headers.cookie);
-      handshake.sessionId = handshake.cookie['express.sid'];
-      handshake.sessionStore = sessionStore;
-      sessionStore.get(handshake.sessionId, function (err, session) {
-        if (err || !session) {
-          callback('Error', false)
-        } else {
-          handshake.session = new Session(handshake, session);
-          callback(null, true);
-        }
-      });
-    } else {
-      callback('No cookie', false);
-    }
-  });
-  socketIo.sockets.on('connection', function (socket) {
+}
+//****************************************START AZURE WEB ROLE COMPATIBILITY HOOK******************
+socketIo.set('transports', ['xhr-polling']);
+socketIo.set('polling duration', 10);
+//****************************************END AZURE WEB ROLE COMPATIBILITY HOOK********************
+//Need to add session information to the socket.io request
+socketIo.set('authorization', function (handshake, callback) {
+  if (handshake.headers.cookie) {
+    handshake.cookie = parseCookie(handshake.headers.cookie);
+    handshake.sessionId = handshake.cookie['express.sid'];
+    handshake.sessionStore = sessionStore;
+    sessionStore.get(handshake.sessionId, function (err, session) {
+      if (err || !session) {
+        callback('Error', false)
+      } else {
+        handshake.session = new Session(handshake, session);
+        callback(null, true);
+      }
+    });
+  } else {
+    callback('No cookie', false);
+  }
+});
+socketIo.sockets.on('connection', function (socket) {
     console.log('Socket.IO: Client connected...');
 
     //Challenge for user to identify themselves once they connect to a team
@@ -106,7 +104,6 @@ var socketIoSetup = function (pub, sub, store) {
       });
     })
   });
-}
 /** End SOCKET.IO **/
 
 /**

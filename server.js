@@ -86,8 +86,8 @@ socketIo.sockets.on('connection', function (socket) {
 * set up authentication using Twitter and Azure ACS
 **/
 everyauth.twitter
-  .consumerKey('')
-  .consumerSecret('')
+  .consumerKey(process.env.twitterKey)
+  .consumerSecret(process.env.twitterSecret)
   .callbackPath('/custom/twitter/callback/path')
   .findOrCreateUser(function (session, accessToken, accessTokenSecret, twitterUserMetadata) {
     dal.findOrCreateUser(twitterUserMetadata);
@@ -96,10 +96,10 @@ everyauth.twitter
   .redirectPath('/')
 
 everyauth.azureacs
-  .identityProviderUrl('')
+  .identityProviderUrl(process.env.acsUrl)
   .entryPath('/auth/azureacs')
   .callbackPath('/auth/azureacs/callback')
-  .signingKey('')
+  .signingKey(process.env.acsKey)
   .realm('http://localhost:3000/')
   .homeRealm('')
   .tokenFormat('swt')

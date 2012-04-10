@@ -21,7 +21,7 @@ var redisUrl = process.env.REDISTOGO_URL;
 var secondpart = redisUrl.split('@').pop().split(':');
 var host = secondpart[0];
 console.log(host);
-var port = secondpart[1];
+var port = secondpart[1].split('/')[0];
 console.log(port);
 var key = redisUrl.split(':')[2].split('@')[0];
 console.log(key);

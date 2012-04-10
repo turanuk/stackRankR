@@ -4,80 +4,109 @@ var everyauth = require('everyauth');
 var MemoryStore = express.session.MemoryStore;
 var sessionStore = new MemoryStore();
 var Session = require('connect').middleware.session.Session;
-
-
 var app = module.exports = express.createServer();
 everyauth.helpExpress(app);
+var redis = require('redis');
+var RedisStore = require('socket.io/lib/stores/redis');
+var parseCookie = require('connect').utils.parseCookie;
+
+//
+/**
+* REDIS
+* -------------------------------------------------------------------------------------------------
+**/
+var redisUrl = process.env.REDISTOGO_URL;
+//Parse the redis environment variable
+//Format: redis://identifier:key@host:port
+var secondpart = redisUrl.split('@').pop().split(':');
+var host = secondpart[0];
+console.log(host);
+var port = secondpart[1];
+console.log(port);
+var key = redisUrl.split(':')[2].split('@')[0];
+console.log(key);
+
+//Option for no ready check needed, otherwise the ready check fails with auth and the process dies out
+var options = { no_ready_check: true };
+
+var pub = redis.createClient(port, host, options);
+pub.on('error', function (err) { console.log (err); });
+pub.auth(key, function () {
+  var sub = redis.createClient(port, host, options);
+  sub.on('error', function (err) { console.log (err); });
+  sub.auth(key, function() {
+    var store = redis.createClient(port, host, options);
+    store.on('error', function (err) { console.log (err); });
+    store.on('ready', function() {
+      socketIoSetup(pub, sub, store);
+    });
+    store.auth(key, function() {});
+  });
+});
+/** End REDIS **/
 
 //
 /**
 * SOCKET.IO
 * -------------------------------------------------------------------------------------------------
 **/
-var socketIo = require('socket.io').listen(app);
-var redis = require('redis');
-var RedisStore = require('socket.io/lib/stores/redis');
-var parseCookie = require('connect').utils.parseCookie;
-var pub = redis.createClient();
-var sub = redis.createClient();
-var store = redis.createClient();
+var socketIoSetup = function (pub, sub, store) {
+  var socketIo = require('socket.io').listen(app);
+  socketIo.set('log level', 1);
 
-socketIo.set('log level', 1);
+  //****************************************START AZURE WEB ROLE COMPATIBILITY HOOK******************
+  socketIo.set('transports', ['xhr-polling']);
+  socketIo.set('polling duration', 10);
+  //****************************************END AZURE WEB ROLE COMPATIBILITY HOOK********************
+  socketIo.set('store', new RedisStore({ redisPub: pub, redisSub: sub, redisClient: store}));
 
-//****************************************START AZURE WEB ROLE COMPATIBILITY HOOK******************
-socketIo.set('transports', ['xhr-polling']);
-socketIo.set('polling duration', 10);
-//****************************************END AZURE WEB ROLE COMPATIBILITY HOOK********************
-
-socketIo.set('store', new RedisStore({redisPub: pub, redisSub:sub, redisClient:store}));
-
-//Need to add session information to the socket.io request
-socketIo.set('authorization', function (handshake, callback) {
-  if (handshake.headers.cookie) {
-    handshake.cookie = parseCookie(handshake.headers.cookie);
-    handshake.sessionId = handshake.cookie['express.sid'];
-    handshake.sessionStore = sessionStore;
-    sessionStore.get(handshake.sessionId, function (err, session) {
-      if (err || !session) {
-        callback('Error', false)
-      } else {
-        handshake.session = new Session(handshake, session);
-        callback(null, true);
-      }
-    });
-  } else {
-    callback('No cookie', false);
-  }
-});
-socketIo.sockets.on('connection', function (socket) {
-  console.log('Socket.IO: Client connected...');
-
-  //Challenge for user to identify themselves once they connect to a team
-  socket.emit('identifyUser');
-
-  //Store a user connection in a look-up table (user identifies themselves)
-  socket.on('userConnected', function (incoming) {
-    //Join a channel for the teamId
-    socket.join(incoming.teamId);
-    socket.team = incoming.teamId;
+  //Need to add session information to the socket.io request
+  socketIo.set('authorization', function (handshake, callback) {
+    if (handshake.headers.cookie) {
+      handshake.cookie = parseCookie(handshake.headers.cookie);
+      handshake.sessionId = handshake.cookie['express.sid'];
+      handshake.sessionStore = sessionStore;
+      sessionStore.get(handshake.sessionId, function (err, session) {
+        if (err || !session) {
+          callback('Error', false)
+        } else {
+          handshake.session = new Session(handshake, session);
+          callback(null, true);
+        }
+      });
+    } else {
+      callback('No cookie', false);
+    }
   });
+  socketIo.sockets.on('connection', function (socket) {
+    console.log('Socket.IO: Client connected...');
 
-  //Clean up user once they disconnect
-  socket.on('disconnect', function () {
-    console.log('disconnected socket id: ' + socket.id);
-    socket.leave(socket.team);
-  });
+    //Challenge for user to identify themselves once they connect to a team
+    socket.emit('identifyUser');
 
-  //When the data changes we need to update others viewing the team
-  socket.on('dataChanged', function (data) {
-    //Get team data from db and broadcast to users looking at the team
-    var userId = socket.handshake.session.auth.twitter.user.id;
-    dal.getTeamRedis(userId, data.teamId, function (team) {
-      socket.broadcast.to(data.teamId).json.send(team);
+    //Store a user connection in a look-up table (user identifies themselves)
+    socket.on('userConnected', function (incoming) {
+      //Join a channel for the teamId
+      socket.join(incoming.teamId);
+      socket.team = incoming.teamId;
     });
-  })
-});
 
+    //Clean up user once they disconnect
+    socket.on('disconnect', function () {
+      console.log('disconnected socket id: ' + socket.id);
+      socket.leave(socket.team);
+    });
+
+    //When the data changes we need to update others viewing the team
+    socket.on('dataChanged', function (data) {
+      //Get team data from db and broadcast to users looking at the team
+      var userId = socket.handshake.session.auth.twitter.user.id;
+      dal.getTeamRedis(userId, data.teamId, function (team) {
+        socket.broadcast.to(data.teamId).json.send(team);
+      });
+    })
+  });
+}
 /** End SOCKET.IO **/
 
 /**

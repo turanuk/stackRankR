@@ -46,67 +46,6 @@ pub.auth(key, function () {
 });
 /** End REDIS **/
 
-//
-/**
-* SOCKET.IO
-* -------------------------------------------------------------------------------------------------
-**/
-var socketIoSetup = function (pub, sub, store) {
-  socketIo.set('store', new RedisStore({ redisPub: pub, redisSub: sub, redisClient: store}));
-}
-//****************************************START AZURE WEB ROLE COMPATIBILITY HOOK******************
-socketIo.configure(function() {
-  socketIo.set('transports', ['xhr-polling']);
-  socketIo.set('polling duration', 100);
-});
-//****************************************END AZURE WEB ROLE COMPATIBILITY HOOK********************
-//Need to add session information to the socket.io request
-socketIo.set('authorization', function (handshake, callback) {
-  if (handshake.headers.cookie) {
-    handshake.cookie = parseCookie(handshake.headers.cookie);
-    handshake.sessionId = handshake.cookie['express.sid'];
-    handshake.sessionStore = sessionStore;
-    sessionStore.get(handshake.sessionId, function (err, session) {
-      if (err || !session) {
-        callback('Error', false)
-      } else {
-        handshake.session = new Session(handshake, session);
-        callback(null, true);
-      }
-    });
-  } else {
-    callback('No cookie', false);
-  }
-});
-socketIo.sockets.on('connection', function (socket) {
-    console.log('Socket.IO: Client connected...');
-
-    //Challenge for user to identify themselves once they connect to a team
-    socket.emit('identifyUser');
-
-    //Store a user connection in a look-up table (user identifies themselves)
-    socket.on('userConnected', function (incoming) {
-      //Join a channel for the teamId
-      socket.join(incoming.teamId);
-      socket.team = incoming.teamId;
-    });
-
-    //Clean up user once they disconnect
-    socket.on('disconnect', function () {
-      console.log('disconnected socket id: ' + socket.id);
-      socket.leave(socket.team);
-    });
-
-    //When the data changes we need to update others viewing the team
-    socket.on('dataChanged', function (data) {
-      //Get team data from db and broadcast to users looking at the team
-      var userId = socket.handshake.session.auth.twitter.user.id;
-      dal.getTeamRedis(userId, data.teamId, function (team) {
-        socket.broadcast.to(data.teamId).json.send(team);
-      });
-    })
-  });
-/** End SOCKET.IO **/
 
 /**
 * AUTHENTICATION
@@ -171,6 +110,71 @@ var authorizedUser = function (req, res, next) {
     res.render('autherror');
   }
 }
+
+//
+/**
+* SOCKET.IO
+* -------------------------------------------------------------------------------------------------
+**/
+socketIo.configure(function() {
+  socketIo.set('transports', ['xhr-polling']);
+  socketIo.set('polling duration', 100);
+  //Need to add session information to the socket.io request
+  socketIo.set('authorization', function (handshake, callback) {
+    if (handshake.headers.cookie) {
+      handshake.cookie = parseCookie(handshake.headers.cookie);
+      handshake.sessionId = handshake.cookie['express.sid'];
+      handshake.sessionStore = sessionStore;
+      sessionStore.get(handshake.sessionId, function (err, session) {
+        if (err || !session) {
+          callback('Error', false)
+        } else {
+          handshake.session = new Session(handshake, session);
+          callback(null, true);
+        }
+      });
+    } else {
+      callback('No cookie', false);
+    }
+  });
+});
+
+var socketIoSetup = function (pub, sub, store) {
+  socketIo.set('store', new RedisStore({ redisPub: pub, redisSub: sub, redisClient: store}));
+}
+
+socketIo.sockets.on('connection', function (socket) {
+    console.log('socketIO: connected socket id: ' + socket.id);
+
+    //Challenge for user to identify themselves once they connect to a team
+    socket.emit('identifyUser');
+
+    //Store a user connection in a look-up table (user identifies themselves)
+    socket.on('userConnected', function (incoming) {
+      //Join a channel for the teamId
+      socket.join(incoming.teamId);
+      socket.team = incoming.teamId;
+    });
+
+    //Clean up user once they disconnect
+    socket.on('disconnect', function () {
+      console.log('socketIo: Disconnected socket id: ' + socket.id);
+      socket.leave(socket.team);
+    });
+
+    //When the data changes we need to update others viewing the team
+    socket.on('dataChanged', function (data) {
+      console.log('socketIo: Data changed');
+      //Get team data from db and broadcast to users looking at the team
+      var userId = socket.handshake.session.auth.twitter.user.id;
+      console.log('socketIo: userId: ' + userId + ', teamId:' + data.teamId);
+      dal.getTeamRedis(userId, data.teamId, function (team) {
+        console.log('socketIo: team' + team);
+        socket.broadcast.to(data.teamId).json.send(team);
+      });
+    })
+  });
+/** End SOCKET.IO **/
 
 /**
 * ROUTING

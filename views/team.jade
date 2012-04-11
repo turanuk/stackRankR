@@ -1,8 +1,5 @@
-script(src=base + '/knockout/TeamViewModel.js')
 script(src=base + '/js/socket.io.min.js')
-
-script(type='text/javascript')
-  var socket = io.connect('http://localhost:3000');
+script(src=base + '/knockout/TeamViewModel.js')
 
 div(class="iconbar")
   a(href="#", data-bind="click: $root.refreshTeam", class="icon firstIcon refreshIcon")

@@ -1,6 +1,6 @@
 /// <reference path="../js/knockout-2.0.0.js" />
 /// <reference path="../js/linq.min.js" />
-
+var socket = io.connect();
 //Shortcut for unwrapping observables
 var unwrap = ko.utils.unwrapObservable;
 

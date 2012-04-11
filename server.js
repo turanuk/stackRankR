@@ -55,8 +55,10 @@ var socketIoSetup = function (pub, sub, store) {
   socketIo.set('store', new RedisStore({ redisPub: pub, redisSub: sub, redisClient: store}));
 }
 //****************************************START AZURE WEB ROLE COMPATIBILITY HOOK******************
-socketIo.set('transports', ['xhr-polling']);
-socketIo.set('polling duration', 10);
+socketIo.configure(function() {
+  socketIo.set('transports', ['xhr-polling']);
+  socketIo.set('polling duration', 100);
+});
 //****************************************END AZURE WEB ROLE COMPATIBILITY HOOK********************
 //Need to add session information to the socket.io request
 socketIo.set('authorization', function (handshake, callback) {

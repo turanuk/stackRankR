@@ -19,13 +19,18 @@ var socketIo = require('socket.io').listen(app);
 var redisUrl = process.env.REDISTOGO_URL;
 //Parse the redis environment variable
 //Format: redis://identifier:key@host:port
-var secondpart = redisUrl.split('@').pop().split(':');
-var host = secondpart[0];
-console.log(host);
-var port = secondpart[1].split('/')[0];
-console.log(port);
-var key = redisUrl.split(':')[2].split('@')[0];
-console.log(key);
+
+var host, port, key;
+
+if (redisUrl) {
+  var secondpart = redisUrl.split('@').pop().split(':');
+  host = secondpart[0];
+  console.log(host);
+  port = secondpart[1].split('/')[0];
+  console.log(port);
+  key = redisUrl.split(':')[2].split('@')[0];
+  console.log(key);
+}
 
 //Option for no ready check needed, otherwise the ready check fails with auth and the process dies out
 var options = { no_ready_check: true };

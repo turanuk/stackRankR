@@ -18,17 +18,12 @@ var Person = function (PersonId, Name) {
 var Ranking = function (RankingId, Name, People) {
   var self = this;
   self.RankingId = ko.observable(RankingId);
-  self.RankingId.subscribe(function () {
-    hasChanges(hasChanges() + 1);
-  });
+  //don't need to subscribe to RankingId changes as we currently do not support 
   self.Name = ko.observable(Name);
   self.Name.subscribe(function () {
     hasChanges(hasChanges() + 1);
   });
   self.People = ko.observableArray(People);
-  self.People.subscribe(function () {
-    hasChanges(hasChanges() + 1);
-  });
   self.EditRankingName = ko.observable(false);
 }
 
@@ -40,9 +35,6 @@ var Team = function (TeamId, Name, Rankings) {
     hasChanges(hasChanges() + 1);
   });
   self.Rankings = ko.observableArray(Rankings);
-  self.Rankings.subscribe(function () {
-    hasChanges(hasChanges() + 1);
-  });
   self.EditTeamName = ko.observable(false);
 }
 
@@ -63,6 +55,7 @@ var TeamViewModel = function (team) {
     ranking.People.remove(person);
     ranking.People.splice(newIndex, 0, person);
     self.updatePersonIds(ranking);
+    hasChanges(hasChanges() + 1);
   }
 
   self.movePerson = function (newIndex, personId, sourceRankingId, targetRankingId) {
@@ -73,6 +66,7 @@ var TeamViewModel = function (team) {
     targetRanking.People.splice(newIndex, 0, person);
     self.updatePersonIds(sourceRanking);
     self.updatePersonIds(targetRanking);
+    hasChanges(hasChanges() + 1);
   }
   
   //Helper functions
@@ -99,6 +93,7 @@ var TeamViewModel = function (team) {
     if (ranking.People().length === 0) {
       self.team().Rankings.remove(ranking);
       self.updateRankingIds();
+      hasChanges(hasChanges() + 1);
     } else {
       self.status('You cannot delete a ranking with people in it!');
     }
@@ -140,16 +135,19 @@ var TeamViewModel = function (team) {
     var newId = 'r' + ranking.RankingId() + 'p' + ranking.People().length;
     var personToAdd = new Person(newId, 'NewPerson');
     ranking.People.push(personToAdd);
+    hasChanges(hasChanges() + 1);
   }
   self.removePersonFromRanking = function (person, element) {
     var rankingId = $($(element).parents('ul')).attr('data-RankingId');
     var ranking = self.getRankingById(rankingId);
     ranking.People.remove(person);
     self.updatePersonIds(ranking);
+    hasChanges(hasChanges() + 1);
   }
   self.addRanking = function (model) {
     self.team().Rankings.push(new Ranking(self.team().Rankings().length, 'NewRanking', []));
     self.updateRankingIds();
+    hasChanges(hasChanges() + 1);
   }
 
   /////  HELPER FUNCTIONS
@@ -214,7 +212,7 @@ $().ready(function () {
       if (data) {
         var outputTeam = viewModel.createTeamFromObject(data);
         var thisPageViewModel = new TeamViewModel(outputTeam);
-        hasChanges.subscribe(function () {
+        hasChanges.subscribe(function (input) {
           thisPageViewModel.saveTeam();
         });
         ko.applyBindings(thisPageViewModel);

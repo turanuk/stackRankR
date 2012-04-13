@@ -65,19 +65,6 @@ everyauth.twitter
     dal.findOrCreateUser(twitterUserMetadata);
     return twitterUserMetadata;
   })
-  .redirectPath('/')
-
-everyauth.azureacs
-  .identityProviderUrl(process.env.acsUrl)
-  .entryPath('/auth/azureacs')
-  .callbackPath('/auth/azureacs/callback')
-  .signingKey(process.env.acsKey)
-  .realm('http://localhost:3000/')
-  .homeRealm('')
-  .tokenFormat('swt')
-  .findOrCreateUser(function (session, acsUser) {
-    return acsUser;
-  })
   .redirectPath('/');
 
 /**
